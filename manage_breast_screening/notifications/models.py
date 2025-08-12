@@ -35,7 +35,7 @@ class MessageBatch(BaseModel):
     status = models.CharField(
         max_length=50, choices=BATCH_STATUSES, default="unscheduled"
     )
-    notify_failure_reason = models.JSONField(blank=True, null=True)
+    notify_errors = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return f"MessageBatch {self.id} - Status: {self.status}"
