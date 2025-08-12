@@ -8,8 +8,8 @@ BATCH_STATUSES = [
     ("unscheduled", "Unscheduled"),
     ("scheduled", "Scheduled"),
     ("sent", "Sent"),
-    ("failed", "Failed"),
-    ("retrying", "Retrying"),
+    ("failed_unrecoverable", "Failed Unrecoverable"),
+    ("failed_recoverable", "Failed Recoverable"),
 ]
 
 MESSAGE_STATUSES = [
