@@ -158,6 +158,19 @@ class BreastCancerHistoryItemFactory(DjangoModelFactory):
     right_breast_treatment = [BreastCancerHistoryItem.Treatment.NO_RADIOTHERAPY]
 
 
+class BreastAugmentationHistoryItemFactory(DjangoModelFactory):
+    class Meta:
+        model = models.BreastAugmentationHistoryItem
+
+    appointment = SubFactory(AppointmentFactory)
+    right_breast_procedures = [
+        models.BreastAugmentationHistoryItem.Procedure.NO_PROCEDURES
+    ]
+    left_breast_procedures = [
+        models.BreastAugmentationHistoryItem.Procedure.NO_PROCEDURES
+    ]
+
+
 class SymptomFactory(DjangoModelFactory):
     class Meta:
         model = models.Symptom

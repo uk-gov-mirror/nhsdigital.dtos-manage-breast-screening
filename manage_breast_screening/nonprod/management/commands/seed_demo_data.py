@@ -33,6 +33,7 @@ from manage_breast_screening.participants.models.symptom import Symptom
 from manage_breast_screening.participants.tests.factories import (
     AppointmentFactory,
     AppointmentStatusFactory,
+    BreastAugmentationHistoryItemFactory,
     BreastCancerHistoryItemFactory,
     ParticipantAddressFactory,
     ParticipantFactory,
@@ -185,12 +186,22 @@ class Command(BaseCommand):
                 appointment, breast_cancer_history_item
             )
 
+        for breast_augmentation_history_item in medical_information_key.get(
+            "breast_augmentation_history_items", []
+        ):
+            self.create_breast_augmentation_history_item(
+                appointment, breast_augmentation_history_item
+            )
+
     def create_breast_cancer_history_item(
         self, appointment, breast_cancer_history_item
     ):
         BreastCancerHistoryItemFactory(
             appointment=appointment, **breast_cancer_history_item
         )
+
+    def create_breast_augmentation_history_item(self, appointment, item):
+        BreastAugmentationHistoryItemFactory(appointment=appointment, **item)
 
     def create_participant(self, **participant_key):
         address_key = participant_key.pop("address", None)
