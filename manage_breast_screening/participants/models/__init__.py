@@ -1,4 +1,5 @@
 from .appointment import Appointment, AppointmentStatus
+from .breast_augmentation_history_item import BreastAugmentationHistoryItem
 from .breast_cancer_history_item import BreastCancerHistoryItem
 from .ethnicity import Ethnicity
 from .participant import Participant, ParticipantAddress
@@ -9,6 +10,7 @@ from .symptom import Symptom, SymptomAreas, SymptomSubType, SymptomType
 __all__ = [
     "Appointment",
     "AppointmentStatus",
+    "BreastAugmentationHistoryItem",
     "BreastCancerHistoryItem",
     "Participant",
     "ParticipantAddress",
