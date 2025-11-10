@@ -38,6 +38,11 @@
       {{ summaryList(presented_item.summary_list_params) }}
     {% endfor %}
   {% endset %}
+  {% set breast_augmentation_history_html %}
+    {% for presented_item in presenter.breast_augmentation_history %}
+      {{ summaryList(presented_item.summary_list_params) }}
+    {% endfor %}
+  {% endset %}
   {% set non_cancerous_lump_diagnosis_link %}
   <a class="nhsuk-link" href="#">Enter non-cancerous lump diagnosis</a>
   {% endset %}
@@ -52,6 +57,17 @@
        },
        "value": {
          "html": breast_cancer_history_html
+       },
+       "actions": {
+          "items": []
+       }
+     },
+     {
+       "key": {
+         "text": "Breast implants or augmentation"
+       },
+       "value": {
+         "html": breast_augmentation_history_html
        },
        "actions": {
           "items": []
