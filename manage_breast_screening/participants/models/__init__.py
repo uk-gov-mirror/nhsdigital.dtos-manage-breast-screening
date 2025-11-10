@@ -1,6 +1,7 @@
 from .appointment import Appointment, AppointmentStatus
 from .breast_augmentation_history_item import BreastAugmentationHistoryItem
 from .breast_cancer_history_item import BreastCancerHistoryItem
+from .cyst_history_item import CystHistoryItem
 from .ethnicity import Ethnicity
 from .implanted_medical_device_history_item import ImplantedMedicalDeviceHistoryItem
 from .other_procedure_history_item import OtherProcedureHistoryItem
@@ -14,6 +15,7 @@ __all__ = [
     "AppointmentStatus",
     "BreastAugmentationHistoryItem",
     "BreastCancerHistoryItem",
+    "CystHistoryItem",
     "ImplantedMedicalDeviceHistoryItem",
     "OtherProcedureHistoryItem",
     "Participant",
