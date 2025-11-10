@@ -10,7 +10,12 @@ from django.core.management.base import CommandError
 from manage_breast_screening.notifications.management.commands.create_appointments import (
     Command,
 )
-from manage_breast_screening.notifications.models import ZONE_INFO, Appointment, Clinic
+from manage_breast_screening.notifications.models import (
+    ZONE_INFO,
+    Appointment,
+    Clinic,
+    Extract,
+)
 from manage_breast_screening.notifications.tests.factories import (
     AppointmentFactory,
     ClinicFactory,
@@ -117,6 +122,8 @@ class TestCreateAppointments:
         assert appointments[1].number == ""
 
         assert appointments[1].assessment is True
+
+        assert Extract.objects.count() == 2
 
     def test_handles_holding_clinics(self):
         """Test does not create appointments for valid NBSS data marked as a Holding Clinic"""

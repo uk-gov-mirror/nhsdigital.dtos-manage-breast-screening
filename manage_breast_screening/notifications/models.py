@@ -216,3 +216,15 @@ class MessageStatus(models.Model):
     status_updated_at = models.DateTimeField(null=False)
     created_at = models.DateTimeField(null=False, auto_now_add=True)
     updated_at = models.DateTimeField(null=False, auto_now_add=True)
+
+
+class Extract(models.Model):
+    """
+    A model to store the extracted data from the message
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    appointments = models.ManyToManyField("notifications.Appointment", blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    filename = models.CharField(max_length=255, null=False)
+    sequence_number = models.IntegerField(null=False)
