@@ -1,14 +1,22 @@
 from django import forms
+from django.db.models import TextChoices
+from django.forms import CheckboxSelectMultiple
 from django.forms.widgets import Textarea
 
 from manage_breast_screening.nhsuk_forms.fields import (
-    BooleanField,
     CharField,
     ChoiceField,
+)
+from manage_breast_screening.nhsuk_forms.fields.choice_fields import (
+    MultipleChoiceField,
 )
 from manage_breast_screening.participants.models.implanted_medical_device_history_item import (
     ImplantedMedicalDeviceHistoryItem,
 )
+
+
+class HasBeenRemovedChoices(TextChoices):
+    HAS_BEEN_REMOVED = "HAS_BEEN_REMOVED", "Implanted device has been removed"
 
 
 class ImplantedMedicalDeviceForm(forms.Form):
@@ -27,13 +35,18 @@ class ImplantedMedicalDeviceForm(forms.Form):
             classes="nhsuk-u-width-two-thirds",
         )
         self.fields["procedure_year"] = CharField(
+            hint="Leave blank if unknown",
             required=False,
             label="Year of procedure (optional)",
             label_classes="nhsuk-label--m",
             classes="nhsuk-u-width-two-thirds",
         )
-        self.fields["is_removed"] = BooleanField(
-            required=False, label="Implanted device has been removed"
+        self.fields["is_removed"] = MultipleChoiceField(
+            choices=HasBeenRemovedChoices,
+            widget=CheckboxSelectMultiple,
+            label="Removed implants",
+            error_messages={"required": "Select which nipples have changed"},
+            classes="app-checkboxes",
         )
         self.fields["removal_year"] = CharField(
             required=False,

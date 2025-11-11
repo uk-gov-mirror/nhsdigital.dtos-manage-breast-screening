@@ -5,7 +5,7 @@
 {% block form %}
   {% do form.device_sub_type.add_conditional_html('OTHER_MEDICAL_DEVICE', form.device_sub_type_details.as_field_group()) %}
 
-  {% do form.is_removed.add_conditional_html('true', form.removal_year.as_field_group()) %}
+  {% do form.is_removed.add_conditional_html('HAS_BEEN_REMOVED', form.removal_year.as_field_group()) %}
 
   {{ form.device_sub_type.as_field_group() }}
 
