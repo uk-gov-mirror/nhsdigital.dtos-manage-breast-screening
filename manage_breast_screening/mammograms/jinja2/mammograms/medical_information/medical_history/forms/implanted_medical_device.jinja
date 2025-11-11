@@ -3,9 +3,22 @@
 {% from "nhsuk/components/fieldset/macro.jinja" import fieldset %}
 
 {% block form %}
-  {% do form.symptom_sub_type.add_conditional_html('CARDIAC_DEVICE', form.symptom_sub_type_details.as_field_group()) %}
+  {% do form.device_sub_type.add_conditional_html('OTHER_MEDICAL_DEVICE', form.device_sub_type_details.as_field_group()) %}
 
-  {{ form.symptom_sub_type.as_field_group() }}
+  {% do form.is_removed.add_conditional_html('true', form.removal_year.as_field_group()) %}
+
+  {{ form.device_sub_type.as_field_group() }}
+
+  {{ form.procedure_year.as_field_group() }}
+
+  {{ form.is_removed.as_field_group() }}
 
   {{ form.additional_information.as_field_group() }}
+
+  <div class="nhsuk-button-group">
+    {{ button({
+      "text": "Save device"
+    }) }}
+  </div>
 {% endblock %}
+
