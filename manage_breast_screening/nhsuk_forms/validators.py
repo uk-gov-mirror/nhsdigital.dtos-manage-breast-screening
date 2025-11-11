@@ -37,5 +37,5 @@ class ExcludesOtherOptionsValidator:
 
         if self.option_that_excludes_other_options in value and len(value) > 1:
             raise ValidationError(
-                f'Unselect "{self.option_label}" in order to select other values'
+                f'Unselect "{self.option_label}" in order to select other options'
             )

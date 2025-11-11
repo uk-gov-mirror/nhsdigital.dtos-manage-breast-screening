@@ -39,6 +39,6 @@ class TestExcludesOtherOptionsValidator:
     def test_invalid_data(self, validator):
         with pytest.raises(
             ValidationError,
-            match=r"\['Unselect \"None of the above\" in order to select other values'\]",
+            match=r"\['Unselect \"None of the above\" in order to select other options'\]",
         ):
             validator(["foo", "bar", "baz", "NONE_OF_THE_ABOVE"])
