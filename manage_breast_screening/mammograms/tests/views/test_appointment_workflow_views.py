@@ -255,9 +255,9 @@ class TestReviewMedicalInformationView:
         mock_send_action.assert_called_once_with(relay, action)
 
     def test_redirects_to_gateway_images_when_enabled(
-        self, clinical_user_client, monkeypatch, confirmed_identity_appointment
+        self, clinical_user_client, with_flag_enabled, confirmed_identity_appointment
     ):
-        monkeypatch.setenv("GATEWAY_IMAGES_ENABLED", "true")
+        with_flag_enabled("gateway_images")
         RelayFactory.create(
             setting=confirmed_identity_appointment.clinic_slot.clinic.setting
         )
