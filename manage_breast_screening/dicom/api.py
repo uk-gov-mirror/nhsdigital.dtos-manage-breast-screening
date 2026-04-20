@@ -10,10 +10,10 @@ from ninja.files import UploadedFile
 from manage_breast_screening.core.api_schema import ErrorResponse, StatusResponse
 from manage_breast_screening.gateway.models import GatewayAction, GatewayActionStatus
 
+from .authentication import Authentication
 from .dicom_recorder import DicomRecorder
-from .token_validator import TokenValidator
 
-router = Router(auth=TokenValidator())
+router = Router(auth=Authentication())
 
 logger = logging.getLogger(__name__)
 
