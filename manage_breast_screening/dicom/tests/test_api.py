@@ -16,9 +16,18 @@ from manage_breast_screening.participants.models.appointment import (
 )
 from manage_breast_screening.participants.tests.factories import AppointmentFactory
 
+from ..dicom_recorder import DicomRecorder
+from ..models import Study
+from ..token_validator import TokenValidator
+
 os.environ["NINJA_SKIP_REGISTRY"] = "yes"
 
 client = TestClient(api)
+
+
+@pytest.fixture(autouse=True)
+def enable_api(monkeypatch):
+    monkeypatch.setenv("API_ENABLED", "true")
 
 
 @pytest.fixture
@@ -37,6 +46,11 @@ def appointment_stub():
         is_in_progress=MagicMock(return_value=True),
     )
 
+@pytest.fixture
+def mock_token_validator():
+    with patch.object(TokenValidator, "authenticate", return_value={"sub": "testuser"}):
+        yield
+
 
 @pytest.mark.django_db
 def test_upload_success(dataset, dicom_file, monkeypatch):
@@ -49,10 +63,14 @@ def test_upload_success(dataset, dicom_file, monkeypatch):
         "manage_breast_screening.dicom.dicom_recorder.lookup_appointment",
         return_value=appointment,
     ):
+
+@pytest.mark.django_db
+def test_upload_success(dataset, dicom_file, mock_token_validator):
+    with patch.object(DicomRecorder, "appointment_in_progress", return_value=True):
         response = client.put(
             f"/dicom/{appointment.pk}",
             FILES={"file": dicom_file},
-            headers={"Authorization": "Bearer " + os.getenv("API_AUTH_TOKEN", "")},
+            headers={"Authorization": "Bearer testtoken"},
         )
 
         assert response.status_code == 201
@@ -65,23 +83,19 @@ def test_upload_success(dataset, dicom_file, monkeypatch):
         assert study.source_message_id == str(appointment.pk)
 
 
-def test_upload_no_file(monkeypatch):
-    monkeypatch.setenv("API_ENABLED", "true")
-    monkeypatch.setenv("API_AUTH_TOKEN", "testtoken")
-
+def test_upload_no_file(mock_token_validator):
     response = client.put(
         "/dicom/abc123",
         FILES={"file": None},
-        headers={"Authorization": "Bearer " + os.getenv("API_AUTH_TOKEN", "")},
+        headers={"Authorization": "Bearer testtoken"},
     )
 
     assert response.status_code == 422
 
 
-def test_upload_invalid_file(monkeypatch, appointment_stub):
+def test_upload_invalid_file(monkeypatch, mock_token_validator):
     monkeypatch.setenv("API_ENABLED", "true")
     monkeypatch.setenv("API_AUTH_TOKEN", "testtoken")
-
     invalid_file = SimpleUploadedFile(
         "invalid.dcm", b"not a dicom file", content_type="application/dicom"
     )
@@ -93,7 +107,7 @@ def test_upload_invalid_file(monkeypatch, appointment_stub):
         response = client.put(
             "/dicom/abc123",
             FILES={"file": invalid_file},
-            headers={"Authorization": "Bearer " + os.getenv("API_AUTH_TOKEN", "")},
+            headers={"Authorization": "Bearer testtoken"},
         )
 
     assert response.status_code == 400
@@ -102,16 +116,13 @@ def test_upload_invalid_file(monkeypatch, appointment_stub):
     assert response.json()["detail"] == "The uploaded file is not a valid DICOM file."
 
 
-def test_upload_file_thats_too_large(monkeypatch):
-    monkeypatch.setenv("API_ENABLED", "true")
-    monkeypatch.setenv("API_AUTH_TOKEN", "testtoken")
-
+def test_upload_file_thats_too_large(mock_token_validator):
     invalid_file = MagicMock(spec=SimpleUploadedFile, size=101 * 1024 * 1024)
 
     response = client.put(
         "/dicom/abc123",
         FILES={"file": invalid_file},
-        headers={"Authorization": "Bearer " + os.getenv("API_AUTH_TOKEN", "")},
+        headers={"Authorization": "Bearer testtoken"},
     )
 
     assert response.status_code == 400
@@ -123,7 +134,6 @@ def test_upload_file_thats_too_large(monkeypatch):
 def test_upload_missing_uids(dataset, monkeypatch, appointment_stub):
     monkeypatch.setenv("API_ENABLED", "true")
     monkeypatch.setenv("API_AUTH_TOKEN", "testtoken")
-
     del dataset.StudyInstanceUID
     del dataset.SeriesInstanceUID
     del dataset.SOPInstanceUID
@@ -142,7 +152,7 @@ def test_upload_missing_uids(dataset, monkeypatch, appointment_stub):
         response = client.put(
             "/dicom/abc123",
             FILES={"file": dicom_file},
-            headers={"Authorization": "Bearer " + os.getenv("API_AUTH_TOKEN", "")},
+            headers={"Authorization": "Bearer testtoken"},
         )
 
     assert response.status_code == 400
@@ -167,29 +177,26 @@ def test_upload_appointment_not_in_progress(dicom_file, monkeypatch, appointment
         response = client.put(
             "/dicom/abc123",
             FILES={"file": dicom_file},
-            headers={"Authorization": "Bearer " + os.getenv("API_AUTH_TOKEN", "")},
+            headers={"Authorization": "Bearer testtoken"},
         )
 
         assert response.status_code == 500
         assert response.json()["title"] == "Internal Server Error"
 
 
-@pytest.mark.django_db
-def test_upload_when_api_disabled(dicom_file, monkeypatch):
+def test_upload_when_api_disabled(dicom_file, mock_token_validator, monkeypatch):
     monkeypatch.setenv("API_ENABLED", "false")
-    monkeypatch.setenv("API_AUTH_TOKEN", "testtoken")
 
     response = client.put(
         "/dicom/abc123",
         FILES={"file": dicom_file},
-        headers={"Authorization": "Bearer " + os.getenv("API_AUTH_TOKEN", "")},
+        headers={"Authorization": "Bearer testtoken"},
     )
 
     assert response.status_code == 403
     assert response.json()["status"] == "API is not available"
 
 
-@pytest.mark.django_db
 def test_upload_no_auth(dicom_file):
     response = client.put(
         "/dicom/abc123",
@@ -202,11 +209,21 @@ def test_upload_no_auth(dicom_file):
     }
 
 
-@pytest.mark.django_db
-def test_report_failure(monkeypatch):
-    monkeypatch.setenv("API_ENABLED", "true")
-    monkeypatch.setenv("API_AUTH_TOKEN", "testtoken")
+def test_upload_invalid_auth(dicom_file):
+    response = client.put(
+        "/dicom/abc123",
+        FILES={"file": dicom_file},
+        headers={"Authorization": "Bearer invalidtoken"},
+    )
 
+    assert response.status_code == 401
+    assert response.json() == {
+        "detail": "Unauthorized",
+    }
+
+
+@pytest.mark.django_db
+def test_report_failure(mock_token_validator):
     action = GatewayActionFactory()
 
     response = client.patch(
@@ -225,10 +242,7 @@ def test_report_failure(monkeypatch):
 
 
 @pytest.mark.django_db
-def test_report_failure_action_not_found(monkeypatch):
-    monkeypatch.setenv("API_ENABLED", "true")
-    monkeypatch.setenv("API_AUTH_TOKEN", "testtoken")
-
+def test_report_failure_action_not_found(mock_token_validator):
     response = client.patch(
         "/dicom/00000000-0000-0000-0000-000000000000/failure",
         json={"error": "Missing PatientID"},
