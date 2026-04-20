@@ -614,7 +614,7 @@ def appointment_images_stream(request, pk):
     return response
 
 
-class CheckInformation(WorkflowSidebarMixin, TemplateView):
+class CheckInformationView(WorkflowSidebarMixin, TemplateView):
     active_workflow_step = AppointmentWorkflowStepCompletion.StepNames.CHECK_INFORMATION
     template_name = "mammograms/check_information.jinja"
 

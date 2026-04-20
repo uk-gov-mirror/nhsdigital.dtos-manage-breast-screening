@@ -337,7 +337,7 @@ urlpatterns = [
     ),
     path(
         "<uuid:pk>/check-information/",
-        appointment_workflow_views.CheckInformation.as_view(),
+        appointment_workflow_views.CheckInformationView.as_view(),
         name="check_information",
     ),
     path(
