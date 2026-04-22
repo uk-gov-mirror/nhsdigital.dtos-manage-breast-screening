@@ -999,7 +999,7 @@ class CheckInformationView(WorkflowSidebarMixin, TemplateView):
         )
 
 
-class UpsertAppointmentNoteView(
+class UpsertWorkflowAppointmentNoteView(
     AppointmentNoteMixin, InProgressAppointmentMixin, FormView
 ):
     active_workflow_step = AppointmentWorkflowStepCompletion.StepNames.CHECK_INFORMATION
