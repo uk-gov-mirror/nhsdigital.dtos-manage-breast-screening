@@ -375,7 +375,14 @@ class Command(BaseCommand):
             )
 
     def create_dicom_study(self, study_key):
-        study = DicomStudyFactory(id=study_key["id"])
+        date_and_time = study_key.get("date_and_time")
+        study = DicomStudyFactory(
+            id=study_key["id"],
+            date_and_time=date_and_time,
+            created_at=date_and_time,
+            case_1__created_at=date_and_time,
+            case_2__created_at=date_and_time,
+        )
         for series_key in study_key["series"]:
             images = series_key.pop("images")
             view_position = series_key.pop("view_position")

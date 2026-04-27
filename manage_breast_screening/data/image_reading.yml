@@ -1,5 +1,6 @@
 studies:
   - id: c6ff5cea-a5b8-4823-b307-e5faf587b474
+    date_and_time: '2026-04-27 09:00'
     series:
       - view_position: CC
         laterality: R
@@ -18,6 +19,7 @@ studies:
         images:
           - image_file: set-02/lmlo.png
   - id: 51a2f9a8-a8d4-4bcc-ad3f-7f20f4d71655
+    date_and_time: '2026-04-27 10:00'
     series:
       - view_position: CC
         laterality: R
@@ -35,8 +37,8 @@ studies:
         laterality: L
         images:
           - image_file: set-03/lmlo.png
-
   - id: e468ecb0-33f2-4c27-a930-107c3fabd2d4
+    date_and_time: '2026-04-27 11:00'
     series:
       - view_position: CC
         laterality: R
@@ -63,6 +65,7 @@ studies:
           - image_file: image-library/repeat-large-b-lmlo.png
         repeat_count: 0
   - id: bedbcf0b-b9d8-4d78-960f-ede6c05563d7
+    date_and_time: '2026-04-27 12:00'
     series:
       - view_position: CC
         laterality: R
@@ -81,6 +84,7 @@ studies:
         images:
           - image_file: set-04/lmlo.png
   - id: 378f42d7-3361-43b8-bae6-0ce9113cba80
+    date_and_time: '2026-04-27 13:00'
     series:
       - view_position: CC
         laterality: R
@@ -99,6 +103,7 @@ studies:
         images:
           - image_file: set-05/lmlo.png
   - id: 15564f66-1d9d-4acd-b78f-1a32b4685124
+    date_and_time: '2026-04-27 14:00'
     series:
       - view_position: CC
         laterality: R
@@ -117,6 +122,7 @@ studies:
         images:
           - image_file: set-06/lmlo.png
   - id: 7dffd1de-88ae-4ac3-93d7-a8d4d0820e6b
+    date_and_time: '2026-04-27 15:00'
     series:
       - view_position: CC
         laterality: R
@@ -142,8 +148,8 @@ studies:
         repeat_count: 1
         repeat_reasons:
           - POSITIONING_ERROR
-
   - id: 3a447fe4-f4b3-4961-a83c-5bab17a2cda7
+    date_and_time: '2026-04-27 16:00'
     series:
       - view_position: CC
         laterality: R
@@ -162,6 +168,7 @@ studies:
         images:
           - image_file: set-07/lmlo.png
   - id: 8fc7d736-f2d9-45ad-93cc-f289da5b720b
+    date_and_time: '2026-04-27 17:00'
     series:
       - view_position: CC
         laterality: R
@@ -180,6 +187,7 @@ studies:
         images:
           - image_file: set-08/lmlo.png
   - id: f61faccf-d9ea-4a9b-a284-021680565523
+    date_and_time: '2026-04-27 18:00'
     series:
       - view_position: CC
         laterality: R
@@ -198,6 +206,7 @@ studies:
         images:
           - image_file: set-09/lmlo.png
   - id: c089a4e6-8f66-4148-a14c-ec039e831c44
+    date_and_time: '2026-04-27 19:00'
     series:
       - view_position: CC
         laterality: R
@@ -216,6 +225,7 @@ studies:
         images:
           - image_file: set-10/lmlo.png
   - id: 3b25ff17-47b3-417c-9a8a-340c657f6578
+    date_and_time: '2026-04-27 20:00'
     series:
       - view_position: CC
         laterality: R
@@ -234,6 +244,7 @@ studies:
         images:
           - image_file: set-11/lmlo.png
   - id: 779b425a-b733-4fa9-89d5-fddbb58f09ea
+    date_and_time: '2026-04-27 21:00'
     series:
       - view_position: CC
         laterality: R
@@ -252,6 +263,7 @@ studies:
         images:
           - image_file: set-12/lmlo.png
   - id: 0378ff58-baa5-4484-8afb-258ebfd1e5ef
+    date_and_time: '2026-04-27 22:00'
     series:
       - view_position: CC
         laterality: R
@@ -270,6 +282,7 @@ studies:
         images:
           - image_file: set-13/lmlo.png
   - id: bb2ba1d3-1f72-428a-9c5a-39b50a5d9353
+    date_and_time: '2026-04-27 23:00'
     series:
       - view_position: CC
         laterality: R
@@ -288,6 +301,7 @@ studies:
         images:
           - image_file: set-14/lmlo.png
   - id: f0c600bf-dab2-44d5-aa5e-3b6481deeb48
+    date_and_time: '2026-04-28 00:00'
     series:
       - view_position: CC
         laterality: R
@@ -306,6 +320,7 @@ studies:
         images:
           - image_file: set-15/lmlo.png
   - id: bb2187a1-cd82-440f-94b1-46cef5938a23
+    date_and_time: '2026-04-28 01:00'
     series:
       - view_position: CC
         laterality: R
@@ -324,6 +339,7 @@ studies:
         images:
           - image_file: set-16/lmlo.png
   - id: 9ce6e923-aa30-4118-ac64-725f0fc37698
+    date_and_time: '2026-04-28 02:00'
     series:
       - view_position: CC
         laterality: R
@@ -342,6 +358,7 @@ studies:
         images:
           - image_file: set-17/lmlo.png
   - id: 9162a72b-3506-4b33-9acc-ef71bce07cb6
+    date_and_time: '2026-04-28 03:00'
     series:
       - view_position: CC
         laterality: R
@@ -360,6 +377,7 @@ studies:
         images:
           - image_file: set-18/lmlo.png
   - id: 72233799-7179-435f-be6d-e493a8c6ce78
+    date_and_time: '2026-04-28 04:00'
     series:
       - view_position: CC
         laterality: R
@@ -378,6 +396,7 @@ studies:
         images:
           - image_file: set-19/lmlo.png
   - id: 813a60ef-940c-4d39-bc5b-0167b2dc214c
+    date_and_time: '2026-04-28 05:00'
     series:
       - view_position: CC
         laterality: R
@@ -396,6 +415,7 @@ studies:
         images:
           - image_file: set-20/lmlo.png
   - id: 716f887d-8083-4cc8-9fea-d32213ca8fff
+    date_and_time: '2026-04-28 06:00'
     series:
       - view_position: CC
         laterality: R
@@ -414,6 +434,7 @@ studies:
         images:
           - image_file: set-21/lmlo.png
   - id: 4469102f-b8c6-4cba-9ed7-d77ee4f0ced8
+    date_and_time: '2026-04-28 07:00'
     series:
       - view_position: CC
         laterality: R
@@ -432,6 +453,7 @@ studies:
         images:
           - image_file: set-22/lmlo.png
   - id: 1ecd140e-c427-4c6d-bf20-d138610b3c0b
+    date_and_time: '2026-04-28 08:00'
     series:
       - view_position: CC
         laterality: R
@@ -450,6 +472,7 @@ studies:
         images:
           - image_file: set-23/lmlo.png
   - id: 4ba01e6b-2c5f-4373-9740-4fa6ca22ca1f
+    date_and_time: '2026-04-28 09:00'
     series:
       - view_position: CC
         laterality: R
@@ -468,6 +491,7 @@ studies:
         images:
           - image_file: set-24/lmlo.png
   - id: f082c62a-25b4-4aef-8fdf-415f31d296a4
+    date_and_time: '2026-04-28 10:00'
     series:
       - view_position: CC
         laterality: R
@@ -486,6 +510,7 @@ studies:
         images:
           - image_file: set-25/lmlo.png
   - id: d7d2c799-53fe-46c8-a81c-1cfb0e5fd4af
+    date_and_time: '2026-04-28 11:00'
     series:
       - view_position: CC
         laterality: R
@@ -504,6 +529,7 @@ studies:
         images:
           - image_file: set-26/lmlo.png
   - id: ff3fdaa4-9b7d-4d24-b91a-36e45d4c7dfb
+    date_and_time: '2026-04-28 12:00'
     series:
       - view_position: CC
         laterality: R
