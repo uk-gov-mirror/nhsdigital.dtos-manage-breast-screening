@@ -102,6 +102,10 @@ urlpatterns = [
         include("manage_breast_screening.participants.urls", namespace="participants"),
     ),
     path(
+        "reading/",
+        include("manage_breast_screening.reading.urls", namespace="reading"),
+    ),
+    path(
         "sha",
         sha_view,
     ),

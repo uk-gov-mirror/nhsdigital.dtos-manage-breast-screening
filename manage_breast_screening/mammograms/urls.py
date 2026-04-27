@@ -337,13 +337,8 @@ urlpatterns = [
     ),
     path(
         "<uuid:pk>/check-information/",
-        appointment_workflow_views.check_information_view,
+        appointment_workflow_views.CheckInformationView.as_view(),
         name="check_information",
-    ),
-    path(
-        "<uuid:pk>/complete-screening/",
-        appointment_workflow_views.complete_screening_view,
-        name="complete_screening",
     ),
     path(
         "<uuid:pk>/image-details/new/",

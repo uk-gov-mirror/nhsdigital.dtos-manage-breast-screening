@@ -44,7 +44,6 @@ from manage_breast_screening.mammograms.forms.images.record_images_taken_form im
 from manage_breast_screening.mammograms.presenters.appointment_presenters import (
     AppointmentPresenter,
     ImagesPresenterFactory,
-    WorkflowPresenter,
 )
 from manage_breast_screening.mammograms.presenters.medical_history.check_medical_information_presenter import (
     CheckMedicalInformationPresenter,
@@ -53,7 +52,6 @@ from manage_breast_screening.mammograms.services.appointment_services import (
     AppointmentStatusUpdater,
     AppointmentWorkflowService,
     RecallService,
-    StepNames,
 )
 from manage_breast_screening.mammograms.views import gateway_images_enabled
 from manage_breast_screening.manual_images.models import Study
@@ -86,6 +84,7 @@ from .mixins import AppointmentMixin, InProgressAppointmentMixin, WorkflowSideba
 MAMMOGRAMS_RECORD_MEDICAL_INFORMATION_VIEWNAME = "mammograms:record_medical_information"
 APPOINTMENT_NOT_FOUND = "Appointment not found"
 SHOW_APPOINTMENT_URL_NAME = "mammograms:show_appointment"
+CLINICS_SHOW_CLINIC_VIEWNAME = "clinics:show_clinic"
 WorkflowSteps = AppointmentWorkflowStepCompletion.StepNames
 
 logger = logging.getLogger(__name__)
@@ -212,7 +211,8 @@ class ConfirmAppointmentCannotGoAheadView(InProgressAppointmentMixin, FormView):
 
     def get_success_url(self):
         return reverse(
-            "clinics:show_clinic", kwargs={"pk": self.appointment.clinic_slot.clinic.pk}
+            CLINICS_SHOW_CLINIC_VIEWNAME,
+            kwargs={"pk": self.appointment.clinic_slot.clinic.pk},
         )
 
     def get_context_data(self, **kwargs):
@@ -542,7 +542,9 @@ def check_in_view(request, pk):
             messages.INFO,
             f"{appointment.participant.full_name} has already been checked in.",
         )
-        return redirect("clinics:show_clinic", pk=appointment.clinic_slot.clinic.pk)
+        return redirect(
+            CLINICS_SHOW_CLINIC_VIEWNAME, pk=appointment.clinic_slot.clinic.pk
+        )
 
     AppointmentStatusUpdater(
         appointment=appointment, current_user=request.user
@@ -875,98 +877,6 @@ class ConfirmAppointmentProceedAnywayView(
         return context
 
 
-@require_http_methods(["GET"])
-@permission_required(Permission.DO_MAMMOGRAM_APPOINTMENT, raise_exception=True)
-def check_information_view(request, pk):
-    provider = request.user.current_provider
-    try:
-        appointment = provider.appointments.select_related(
-            "clinic_slot__clinic",
-            "screening_episode__participant",
-            "screening_episode__participant__address",
-        ).get(pk=pk)
-    except Appointment.DoesNotExist:
-        raise Http404("Appointment not found")
-
-    if not AppointmentWorkflowService(appointment, request.user).is_valid_next_step(
-        StepNames.CHECK_INFORMATION
-    ):
-        return redirect(
-            SHOW_APPOINTMENT_URL_NAME,
-            pk=appointment.pk,
-        )
-
-    return render(
-        request,
-        "mammograms/check_information.jinja",
-        context={
-            "page_title": "Check information",
-            "heading": "Check information",
-            "presented_appointment": AppointmentPresenter(appointment),
-            "presented_images": ImagesPresenterFactory.presenter_for(appointment),
-            "presented_medical_information": CheckMedicalInformationPresenter(
-                appointment
-            ),
-            "presented_workflow_steps": WorkflowPresenter(
-                AppointmentWorkflowService(appointment, request.user)
-            ).workflow_steps(StepNames.CHECK_INFORMATION),
-        },
-    )
-
-
-@require_http_methods(["POST"])
-@permission_required(Permission.DO_MAMMOGRAM_APPOINTMENT, raise_exception=True)
-def complete_screening_view(request, pk):
-    provider = request.user.current_provider
-    try:
-        appointment = provider.appointments.select_related(
-            "clinic_slot__clinic",
-            "screening_episode__participant",
-        ).get(pk=pk)
-    except Appointment.DoesNotExist:
-        raise Http404(APPOINTMENT_NOT_FOUND)
-
-    if not AppointmentWorkflowService(appointment, request.user).is_valid_next_step(
-        StepNames.CHECK_INFORMATION
-    ):
-        return redirect(
-            SHOW_APPOINTMENT_URL_NAME,
-            pk=appointment.pk,
-        )
-
-    AppointmentStatusUpdater(
-        appointment=appointment, current_user=request.user
-    ).screen()
-    appointment.completed_workflow_steps.create(
-        step_name=StepNames.CHECK_INFORMATION,
-        created_by=request.user,
-    )
-
-    view_appointment_url = reverse(
-        SHOW_APPOINTMENT_URL_NAME,
-        kwargs={
-            "pk": appointment.pk,
-        },
-    )
-    escaped_full_name = escape(appointment.screening_episode.participant.full_name)
-    messages.add_message(
-        request,
-        messages.SUCCESS,
-        mark_safe(
-            f"""
-            <p class=\"nhsuk-notification-banner__heading\">
-                {escaped_full_name} has been screened.
-                <a href=\"{view_appointment_url}\" class=\"app-u-nowrap\">
-                    View their appointment
-                </a>
-            </p>
-            """
-        ),
-    )
-
-    return redirect("clinics:show_clinic", pk=appointment.clinic_slot.clinic.pk)
-
-
 @require_http_methods(["POST"])
 @permission_required(Permission.DO_MAMMOGRAM_APPOINTMENT, raise_exception=True)
 def attended_not_screened_view(request, appointment_pk):
@@ -1029,6 +939,64 @@ def appointment_images_stream_view(request, pk):
     response["Cache-Control"] = "no-cache"
     response["X-Accel-Buffering"] = "no"
     return response
+
+
+class CheckInformationView(WorkflowSidebarMixin, TemplateView):
+    active_workflow_step = AppointmentWorkflowStepCompletion.StepNames.CHECK_INFORMATION
+    template_name = "mammograms/check_information.jinja"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "page_title": "Check information",
+                "heading": "Check information",
+                "presented_images": ImagesPresenterFactory.presenter_for(
+                    self.appointment
+                ),
+                "presented_medical_information": CheckMedicalInformationPresenter(
+                    self.appointment
+                ),
+            }
+        )
+        return context
+
+    def post(self, request, pk):
+        AppointmentStatusUpdater(
+            appointment=self.appointment, current_user=request.user
+        ).screen()
+        self.appointment.completed_workflow_steps.get_or_create(
+            step_name=AppointmentWorkflowStepCompletion.StepNames.CHECK_INFORMATION,
+            defaults={"created_by": self.request.user},
+        )
+
+        view_appointment_url = reverse(
+            "mammograms:show_appointment",
+            kwargs={
+                "pk": self.appointment.pk,
+            },
+        )
+        escaped_full_name = escape(
+            self.appointment.screening_episode.participant.full_name
+        )
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            mark_safe(
+                f"""
+            <p class=\"nhsuk-notification-banner__heading\">
+                {escaped_full_name} has been screened.
+                <a href=\"{view_appointment_url}\" class=\"app-u-nowrap\">
+                    View their appointment
+                </a>
+            </p>
+            """
+            ),
+        )
+
+        return redirect(
+            CLINICS_SHOW_CLINIC_VIEWNAME, pk=self.appointment.clinic_slot.clinic.pk
+        )
 
 
 class UpsertAppointmentNoteView(
