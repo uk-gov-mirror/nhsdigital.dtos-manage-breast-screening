@@ -12,3 +12,4 @@ class Permission(StrEnum):
     VIEW_MAMMOGRAM_APPOINTMENT = "mammograms.view_mammogram_appointment"
     DO_MAMMOGRAM_APPOINTMENT = "mammograms.do_mammogram_appointment"
     MANAGE_PROVIDER_SETTINGS = "clinics.manage_provider_settings"
+    READ_IMAGES = "reading.read_images"
