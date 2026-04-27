@@ -193,7 +193,7 @@ class TestConfirmIdentityView:
 
 
 @pytest.mark.django_db
-class TestMedicalInformationView:
+class TestReviewMedicalInformationView:
     def test_renders_response(
         self, clinical_user_client, confirmed_identity_appointment
     ):

@@ -134,7 +134,7 @@ class ConfirmIdentityView(WorkflowSidebarMixin, TemplateView):
         return redirect(MAMMOGRAMS_RECORD_MEDICAL_INFORMATION_VIEWNAME, pk=pk)
 
 
-class MedicalInformationView(WorkflowSidebarMixin, FormView):
+class ReviewMedicalInformationView(WorkflowSidebarMixin, FormView):
     active_workflow_step = (
         AppointmentWorkflowStepCompletion.StepNames.REVIEW_MEDICAL_INFORMATION
     )

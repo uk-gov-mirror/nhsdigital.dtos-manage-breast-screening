@@ -62,7 +62,7 @@ urlpatterns = [
     ),
     path(
         "<uuid:pk>/record-medical-information/",
-        appointment_workflow_views.MedicalInformationView.as_view(),
+        appointment_workflow_views.ReviewMedicalInformationView.as_view(),
         name="record_medical_information",
     ),
     path(
