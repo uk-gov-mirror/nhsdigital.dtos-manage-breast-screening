@@ -55,7 +55,7 @@
     "globals": "^17.4.0",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
-    "jest-junit": "^16.0.0",
+    "jest-junit": "^17.0.0",
     "jsdom": "^29.0.2",
     "outdent": "^0.8.0",
     "postcss": "^8.5.8",
