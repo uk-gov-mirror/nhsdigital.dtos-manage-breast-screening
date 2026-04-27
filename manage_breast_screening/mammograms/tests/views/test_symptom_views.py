@@ -103,11 +103,11 @@ class TestAddLumpView:
 
 
 @pytest.mark.django_db
-class TestChangeLumpView:
+class TestUpdateLumpView:
     def test_renders_response(self, clinical_user_client, lump):
         response = clinical_user_client.http.get(
             reverse(
-                "mammograms:change_symptom_lump",
+                "mammograms:update_symptom_lump",
                 kwargs={"pk": lump.appointment.pk, "symptom_pk": lump.pk},
             )
         )
@@ -124,7 +124,7 @@ class TestChangeLumpView:
         """
         response = clinical_user_client.http.get(
             reverse(
-                "mammograms:change_symptom_lump",
+                "mammograms:update_symptom_lump",
                 kwargs={
                     "pk": confirmed_identity_appointment.pk,
                     "symptom_pk": "beefbeef-beef-beef-beef-beefbeefbeef",
@@ -143,7 +143,7 @@ class TestChangeLumpView:
 
         response = clinical_user_client.http.get(
             reverse(
-                "mammograms:change_symptom_lump",
+                "mammograms:update_symptom_lump",
                 kwargs={
                     "pk": confirmed_identity_appointment.pk,
                     "symptom_pk": "beefbeef-beef-beef-beef-beefbeefbeef",
@@ -156,7 +156,7 @@ class TestChangeLumpView:
     def test_valid_post_redirects_to_appointment(self, clinical_user_client, lump):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:change_symptom_lump",
+                "mammograms:update_symptom_lump",
                 kwargs={"pk": lump.appointment.pk, "symptom_pk": lump.pk},
             ),
             {
@@ -179,7 +179,7 @@ class TestChangeLumpView:
     ):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:change_symptom_lump",
+                "mammograms:update_symptom_lump",
                 kwargs={"pk": lump.appointment.pk, "symptom_pk": lump.pk},
             ),
             {},
@@ -204,7 +204,7 @@ class TestChangeLumpView:
         lump = SymptomFactory.create(appointment=in_progress_appointment, lump=True)
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:change_symptom_lump",
+                "mammograms:update_symptom_lump",
                 kwargs={
                     "pk": in_progress_appointment.pk,
                     "symptom_pk": lump.pk,
@@ -259,7 +259,7 @@ class TestAddSkinChangeView:
 
 
 @pytest.mark.django_db
-class TestChangeSkinChangeView:
+class TestUpdateSkinChangeView:
     @pytest.fixture
     def colour_change(self, confirmed_identity_appointment):
         return SymptomFactory.create(
@@ -269,7 +269,7 @@ class TestChangeSkinChangeView:
     def test_renders_response(self, clinical_user_client, colour_change):
         response = clinical_user_client.http.get(
             reverse(
-                "mammograms:change_symptom_skin_change",
+                "mammograms:update_symptom_skin_change",
                 kwargs={
                     "pk": colour_change.appointment.pk,
                     "symptom_pk": colour_change.pk,
@@ -283,7 +283,7 @@ class TestChangeSkinChangeView:
     ):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:change_symptom_skin_change",
+                "mammograms:update_symptom_skin_change",
                 kwargs={
                     "pk": colour_change.appointment.pk,
                     "symptom_pk": colour_change.pk,
@@ -344,7 +344,7 @@ class TestAddNippleChangeView:
 
 
 @pytest.mark.django_db
-class TestChangeNippleChangeView:
+class TestUpdateNippleChangeView:
     @pytest.fixture
     def inversion(self, confirmed_identity_appointment):
         return SymptomFactory.create(
@@ -354,7 +354,7 @@ class TestChangeNippleChangeView:
     def test_renders_response(self, clinical_user_client, inversion):
         response = clinical_user_client.http.get(
             reverse(
-                "mammograms:change_symptom_nipple_change",
+                "mammograms:update_symptom_nipple_change",
                 kwargs={"pk": inversion.appointment.pk, "symptom_pk": inversion.pk},
             )
         )
@@ -363,7 +363,7 @@ class TestChangeNippleChangeView:
     def test_valid_post_redirects_to_appointment(self, clinical_user_client, inversion):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:change_symptom_nipple_change",
+                "mammograms:update_symptom_nipple_change",
                 kwargs={"pk": inversion.appointment.pk, "symptom_pk": inversion.pk},
             ),
             {
@@ -421,7 +421,7 @@ class TestAddOtherSymptomView:
 
 
 @pytest.mark.django_db
-class TestChangeOtherSymptomView:
+class TestUpdateOtherSymptomView:
     @pytest.fixture
     def other_symptom(self, confirmed_identity_appointment):
         return SymptomFactory.create(
@@ -431,7 +431,7 @@ class TestChangeOtherSymptomView:
     def test_renders_response(self, clinical_user_client, other_symptom):
         response = clinical_user_client.http.get(
             reverse(
-                "mammograms:change_symptom_other",
+                "mammograms:update_symptom_other",
                 kwargs={
                     "pk": other_symptom.appointment.pk,
                     "symptom_pk": other_symptom.pk,
@@ -445,7 +445,7 @@ class TestChangeOtherSymptomView:
     ):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:change_symptom_other",
+                "mammograms:update_symptom_other",
                 kwargs={
                     "pk": other_symptom.appointment.pk,
                     "symptom_pk": other_symptom.pk,
@@ -506,7 +506,7 @@ class TestAddBreastPainView:
 
 
 @pytest.mark.django_db
-class TestChangeBreastPainView:
+class TestUpdateBreastPainView:
     @pytest.fixture
     def breast_pain(self, confirmed_identity_appointment):
         return SymptomFactory.create(
@@ -517,7 +517,7 @@ class TestChangeBreastPainView:
     def test_renders_response(self, clinical_user_client, breast_pain):
         response = clinical_user_client.http.get(
             reverse(
-                "mammograms:change_symptom_breast_pain",
+                "mammograms:update_symptom_breast_pain",
                 kwargs={
                     "pk": breast_pain.appointment.pk,
                     "symptom_pk": breast_pain.pk,
@@ -531,7 +531,7 @@ class TestChangeBreastPainView:
     ):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:change_symptom_breast_pain",
+                "mammograms:update_symptom_breast_pain",
                 kwargs={
                     "pk": breast_pain.appointment.pk,
                     "symptom_pk": breast_pain.pk,

@@ -1,5 +1,7 @@
 import logging
 import time
+from functools import cached_property
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
@@ -7,19 +9,23 @@ from django.core.exceptions import ValidationError
 from django.db import DatabaseError, IntegrityError, transaction
 from django.forms import Form
 from django.http import Http404, HttpResponse, StreamingHttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.html import escape, mark_safe
 from django.views import View
 from django.views.decorators.http import require_http_methods
 from django.views.generic import FormView, TemplateView
+from rules.contrib.views import PermissionRequiredMixin
 
 from manage_breast_screening.auth.models import Permission
+from manage_breast_screening.core.models import get_object_or_none
 from manage_breast_screening.core.services.auditor import Auditor
+from manage_breast_screening.core.utils.date_formatting import format_relative_date
 from manage_breast_screening.core.utils.relative_redirects import (
     extract_relative_redirect_url,
 )
+from manage_breast_screening.core.views.generic import UpdateWithAuditView
 from manage_breast_screening.dicom.models import Study as DicomStudy
 from manage_breast_screening.dicom.study_service import (
     StudyService as DicomStudyService,
@@ -48,10 +54,12 @@ from manage_breast_screening.mammograms.services.appointment_services import (
     RecallService,
 )
 from manage_breast_screening.mammograms.views import gateway_images_enabled
+from manage_breast_screening.manual_images.models import Study
 from manage_breast_screening.manual_images.services import StudyService
 from manage_breast_screening.participants.models import (
     Appointment,
     MedicalInformationSection,
+    ParticipantReportedMammogram,
 )
 from manage_breast_screening.participants.models.appointment import (
     AppointmentMachine,
@@ -60,18 +68,29 @@ from manage_breast_screening.participants.models.appointment import (
 )
 from manage_breast_screening.participants.presenters import ParticipantPresenter
 
-from ..forms import AppointmentCannotGoAheadForm, RecordMedicalInformationForm
-from ..presenters import LastKnownMammogramPresenter
+from ..forms import (
+    AppointmentCannotGoAheadForm,
+    AppointmentNoteForm,
+    RecordMedicalInformationForm,
+)
+from ..forms.appointment_proceed_anyway_form import AppointmentProceedAnywayForm
+from ..forms.breast_feature_form import AddBreastFeatureForm, UpdateBreastFeatureForm
+from ..forms.multiple_images_information_form import MultipleImagesInformationForm
+from ..presenters import LastKnownMammogramPresenter, present_secondary_nav
 from ..presenters.medical_information_presenter import MedicalInformationPresenter
-from .mixins import InProgressAppointmentMixin, WorkflowSidebarMixin
+from .appointment_note_views import AppointmentNoteMixin
+from .mixins import AppointmentMixin, InProgressAppointmentMixin, WorkflowSidebarMixin
 
 MAMMOGRAMS_RECORD_MEDICAL_INFORMATION_VIEWNAME = "mammograms:record_medical_information"
+APPOINTMENT_NOT_FOUND = "Appointment not found"
+SHOW_APPOINTMENT_URL_NAME = "mammograms:show_appointment"
 CLINICS_SHOW_CLINIC_VIEWNAME = "clinics:show_clinic"
+WorkflowSteps = AppointmentWorkflowStepCompletion.StepNames
 
 logger = logging.getLogger(__name__)
 
 
-class ConfirmIdentity(WorkflowSidebarMixin, TemplateView):
+class ConfirmIdentityView(WorkflowSidebarMixin, TemplateView):
     active_workflow_step = AppointmentWorkflowStepCompletion.StepNames.CONFIRM_IDENTITY
     template_name = "mammograms/confirm_identity.jinja"
     CONFIRM_IDENTITY_LABEL = "Confirm identity"
@@ -114,7 +133,7 @@ class ConfirmIdentity(WorkflowSidebarMixin, TemplateView):
         return redirect(MAMMOGRAMS_RECORD_MEDICAL_INFORMATION_VIEWNAME, pk=pk)
 
 
-class RecordMedicalInformation(WorkflowSidebarMixin, FormView):
+class ReviewMedicalInformationView(WorkflowSidebarMixin, FormView):
     active_workflow_step = (
         AppointmentWorkflowStepCompletion.StepNames.REVIEW_MEDICAL_INFORMATION
     )
@@ -185,7 +204,7 @@ class RecordMedicalInformation(WorkflowSidebarMixin, FormView):
         return redirect("mammograms:take_images", pk=self.appointment.pk)
 
 
-class AppointmentCannotGoAhead(InProgressAppointmentMixin, FormView):
+class ConfirmAppointmentCannotGoAheadView(InProgressAppointmentMixin, FormView):
     active_workflow_step = AppointmentWorkflowStepCompletion.StepNames.CONFIRM_IDENTITY
     template_name = "mammograms/appointment_cannot_go_ahead.jinja"
     form_class = AppointmentCannotGoAheadForm
@@ -248,7 +267,7 @@ class AppointmentCannotGoAhead(InProgressAppointmentMixin, FormView):
         return super().form_valid(form)
 
 
-class TakeImages(WorkflowSidebarMixin, FormView):
+class UpsertImagesView(WorkflowSidebarMixin, FormView):
     active_workflow_step = AppointmentWorkflowStepCompletion.StepNames.TAKE_IMAGES
     template_name = "mammograms/take_images.jinja"
     form_class = RecordImagesTakenForm
@@ -300,7 +319,7 @@ class TakeImages(WorkflowSidebarMixin, FormView):
         )
 
 
-class GatewayImages(WorkflowSidebarMixin, FormView):
+class UpsertGatewayImagesView(WorkflowSidebarMixin, FormView):
     active_workflow_step = AppointmentWorkflowStepCompletion.StepNames.TAKE_IMAGES
     template_name = "mammograms/gateway_images.jinja"
     form_class = GatewayImageDetailsForm
@@ -349,8 +368,165 @@ class GatewayImages(WorkflowSidebarMixin, FormView):
         )
 
 
+class AddMultipleImagesInformationView(WorkflowSidebarMixin, FormView):
+    active_workflow_step = AppointmentWorkflowStepCompletion.StepNames.TAKE_IMAGES
+    form_class = MultipleImagesInformationForm
+    template_name = "mammograms/multiple_images_information.jinja"
+
+    def get_study(self):
+        try:
+            if gateway_images_enabled(self.appointment):
+                return DicomStudy.for_appointment(self.appointment)
+            else:
+                return self.appointment.study
+        except Study.DoesNotExist:
+            return None
+
+    @cached_property
+    def series_with_multiple_images(self):
+        study = self.get_study()
+        if not study:
+            return []
+        return list(study.series_with_multiple_images())
+
+    def get(self, request, *args, **kwargs):
+        if not self.series_with_multiple_images:
+            return redirect(self.get_success_url())
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if not self.series_with_multiple_images:
+            return redirect(self.get_success_url())
+
+        # Create a temporary form to check staleness using submitted data
+        form = self.form_class(request.POST, instance=self.get_study())
+        if form.is_stale():
+            messages.add_message(
+                request,
+                messages.INFO,
+                "The image details have changed. Please review and continue.",
+            )
+            return redirect(self.get_redirect_back_url())
+
+        return super().post(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["instance"] = self.get_study()
+        return kwargs
+
+    def get_success_url(self):
+        return reverse(
+            "mammograms:check_information", kwargs={"pk": self.appointment.pk}
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        title = (
+            "Image transfer in progress"
+            if gateway_images_enabled(self.appointment)
+            else "Add image information"
+        )
+
+        context.update(
+            {
+                "heading": title,
+                "page_title": title,
+                "back_link_params": {"href": self.get_redirect_back_url()},
+            },
+        )
+        return context
+
+    def get_redirect_back_url(self):
+        if gateway_images_enabled(self.appointment):
+            return reverse(
+                "mammograms:gateway_images", kwargs={"pk": self.appointment_pk}
+            )
+        else:
+            return reverse(
+                "mammograms:add_image_details", kwargs={"pk": self.appointment_pk}
+            )
+
+    @transaction.atomic
+    def form_valid(self, form):
+        form.update(self.study_service)
+
+        auditor = Auditor.from_request(self.request)
+        auditor.audit_bulk_update(form.series_list)
+
+        self.mark_workflow_step_complete()
+        return redirect(self.get_success_url())
+
+    def mark_workflow_step_complete(self):
+        self.appointment.completed_workflow_steps.get_or_create(
+            step_name=AppointmentWorkflowStepCompletion.StepNames.TAKE_IMAGES,
+            defaults={"created_by": self.request.user},
+        )
+
+    @property
+    def study_service(self):
+        if gateway_images_enabled(self.appointment):
+            return DicomStudyService(self.appointment, self.request.user)
+        else:
+            return StudyService(self.appointment, self.request.user)
+
+
+class UpsertBreastFeaturesView(InProgressAppointmentMixin, FormView):
+    template_name = "mammograms/medical_information/breast_features/form.jinja"
+    active_workflow_step = (
+        AppointmentWorkflowStepCompletion.StepNames.REVIEW_MEDICAL_INFORMATION
+    )
+
+    def get_form(self):
+        if hasattr(self.appointment, "breast_features"):
+            form_class = UpdateBreastFeatureForm
+        else:
+            form_class = AddBreastFeatureForm
+
+        return form_class(appointment=self.appointment, **self.get_form_kwargs())
+
+    def get_context_data(self, **kwargs):
+        if hasattr(self.appointment, "breast_features"):
+            features = self.appointment.breast_features.annotations_json
+        else:
+            features = []
+
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "heading": "Record breast features",
+                "caption": self.participant.full_name,
+                "page_title": "Record breast features",
+                "features": features,
+                "diagram_version": 1,
+                "back_link_params": {
+                    "href": reverse(
+                        "mammograms:record_medical_information",
+                        kwargs={"pk": self.appointment_pk},
+                    )
+                },
+                "cannot_proceed_url": reverse(
+                    "mammograms:appointment_cannot_go_ahead",
+                    kwargs={"pk": self.appointment_pk},
+                ),
+            }
+        )
+        return context
+
+    def form_valid(self, form):
+        form.save(current_user=self.request.user)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse(
+            "mammograms:record_medical_information",
+            kwargs={"pk": self.appointment_pk},
+        )
+
+
 @require_http_methods(["GET", "POST"])
-def check_in(request, pk):
+def check_in_view(request, pk):
     if request.method == "GET":
         return redirect("mammograms:show_appointment", pk=pk)
 
@@ -395,7 +571,7 @@ def _should_redirect_stale_check_in(request, appointment):
 
 @require_http_methods(["GET", "POST"])
 @permission_required(Permission.DO_MAMMOGRAM_APPOINTMENT, raise_exception=True)
-def start_appointment(request, pk):
+def start_appointment_view(request, pk):
     if request.method == "GET":
         return redirect("mammograms:show_appointment", pk=pk)
 
@@ -428,7 +604,7 @@ def start_appointment(request, pk):
 
 @require_http_methods(["GET", "POST"])
 @permission_required(Permission.DO_MAMMOGRAM_APPOINTMENT, raise_exception=True)
-def resume_appointment(request, pk):
+def resume_appointment_view(request, pk):
     if request.method == "GET":
         return redirect("mammograms:show_appointment", pk=pk)
 
@@ -466,7 +642,7 @@ def resume_appointment(request, pk):
     return redirect(next_step, pk=pk)
 
 
-class PauseAppointment(InProgressAppointmentMixin, FormView):
+class PauseAppointmentView(InProgressAppointmentMixin, FormView):
     active_workflow_step = AppointmentWorkflowStepCompletion.StepNames.CONFIRM_IDENTITY
     template_name = "mammograms/pause_appointment.jinja"
     form_class = Form
@@ -511,7 +687,7 @@ class PauseAppointment(InProgressAppointmentMixin, FormView):
         )
 
 
-class MarkSectionReviewed(InProgressAppointmentMixin, View):
+class MarkSectionReviewedView(InProgressAppointmentMixin, View):
     active_workflow_step = (
         AppointmentWorkflowStepCompletion.StepNames.REVIEW_MEDICAL_INFORMATION
     )
@@ -566,6 +742,157 @@ class MarkSectionReviewed(InProgressAppointmentMixin, View):
             return HttpResponse(status=201)
 
 
+@require_http_methods(["GET"])
+@permission_required(Permission.DO_MAMMOGRAM_APPOINTMENT, raise_exception=True)
+def appointment_should_not_proceed_view(
+    request, appointment_pk, participant_reported_mammogram_pk
+):
+    provider = request.user.current_provider
+    try:
+        appointment = provider.appointments.select_related(
+            "clinic_slot__clinic",
+            "screening_episode__participant",
+            "screening_episode__participant__address",
+        ).get(pk=appointment_pk)
+    except Appointment.DoesNotExist:
+        raise Http404(APPOINTMENT_NOT_FOUND)
+
+    try:
+        mammogram = appointment.reported_mammograms.get(
+            pk=participant_reported_mammogram_pk
+        )
+    except ParticipantReportedMammogram.DoesNotExist:
+        raise Http404("Participant reported mammogram not found")
+
+    return_url = extract_relative_redirect_url(request, default="")
+    update_previous_mammogram_url = (
+        reverse(
+            "mammograms:update_previous_mammogram",
+            kwargs={
+                "pk": appointment_pk,
+                "participant_reported_mammogram_pk": participant_reported_mammogram_pk,
+            },
+        )
+        + "?"
+        + urlencode({"return_url": return_url})
+    )
+    proceed_anyway_url = (
+        reverse(
+            "mammograms:proceed_anyway",
+            kwargs={
+                "pk": appointment_pk,
+                "participant_reported_mammogram_pk": participant_reported_mammogram_pk,
+            },
+        )
+        + "?"
+        + urlencode({"return_url": return_url})
+    )
+    relative_date = (
+        format_relative_date(mammogram.exact_date)
+        if mammogram.exact_date
+        else "less than 6 months ago"
+    )
+    return render(
+        request,
+        "mammograms/appointment_should_not_proceed.jinja",
+        {
+            "caption": appointment.screening_episode.participant.full_name,
+            "page_title": "This appointment should not proceed",
+            "heading": "This appointment should not proceed",
+            "back_link_params": {
+                "href": update_previous_mammogram_url,
+            },
+            "presented_appointment": AppointmentPresenter(appointment),
+            "time_since_previous_mammogram": relative_date,
+            "update_previous_mammogram_url": update_previous_mammogram_url,
+            "proceed_anyway_url": proceed_anyway_url,
+            "return_url": return_url,
+        },
+    )
+
+
+class ConfirmAppointmentProceedAnywayView(
+    AppointmentMixin, UpdateWithAuditView, PermissionRequiredMixin
+):
+    form_class = AppointmentProceedAnywayForm
+    template_name = "mammograms/proceed_anyway.jinja"
+    thing_name = "a previous mammogram"
+    permission_required = Permission.DO_MAMMOGRAM_APPOINTMENT
+    raise_exception = True
+
+    def update_title(self, thing_name):
+        return "You are continuing despite a recent mammogram"
+
+    def get_object(self):
+        return get_object_or_none(
+            self.appointment.reported_mammograms,
+            pk=self.kwargs.get("participant_reported_mammogram_pk"),
+        )
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["participant"] = self.appointment.participant
+        return kwargs
+
+    def get_success_url(self):
+        return extract_relative_redirect_url(
+            self.request,
+            default=reverse(
+                "mammograms:record_medical_information",
+                kwargs={"pk": self.appointment.pk},
+            ),
+        )
+
+    def get_back_link_params(self):
+        return_url = self.get_success_url()
+
+        return {
+            "href": reverse(
+                "mammograms:appointment_should_not_proceed",
+                kwargs={
+                    "appointment_pk": self.appointment.pk,
+                    "participant_reported_mammogram_pk": self.kwargs[
+                        "participant_reported_mammogram_pk"
+                    ],
+                },
+            )
+            + "?"
+            + urlencode({"return_url": return_url}),
+            "text": "Back",
+        }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        participant = self.appointment.participant
+
+        context.update(
+            {
+                "back_link_params": self.get_back_link_params(),
+                "caption": participant.full_name,
+                "participant_first_name": participant.first_name,
+                "return_url": self.get_success_url(),
+            },
+        )
+
+        return context
+
+
+@require_http_methods(["POST"])
+@permission_required(Permission.DO_MAMMOGRAM_APPOINTMENT, raise_exception=True)
+def attended_not_screened_view(request, appointment_pk):
+    provider = request.user.current_provider
+    try:
+        appointment = provider.appointments.get(pk=appointment_pk)
+    except Appointment.DoesNotExist:
+        raise Http404(APPOINTMENT_NOT_FOUND)
+
+    AppointmentStatusUpdater(
+        appointment, current_user=request.user
+    ).mark_attended_not_screened()
+
+    return redirect("clinics:show_clinic", pk=appointment.clinic_slot.clinic.pk)
+
+
 def format_sse_event(event: str, data: str) -> str:
     """Format data as a Server-Sent Event."""
     lines = "\n".join(f"data: {line}" for line in data.splitlines())
@@ -574,7 +901,7 @@ def format_sse_event(event: str, data: str) -> str:
 
 @login_required
 @require_http_methods(["GET"])
-def appointment_images_stream(request, pk):
+def appointment_images_stream_view(request, pk):
     """SSE endpoint for streaming appointment images as they arrive."""
     try:
         provider = request.user.current_provider
@@ -669,4 +996,44 @@ class CheckInformationView(WorkflowSidebarMixin, TemplateView):
 
         return redirect(
             CLINICS_SHOW_CLINIC_VIEWNAME, pk=self.appointment.clinic_slot.clinic.pk
+        )
+
+
+class UpsertAppointmentNoteView(
+    AppointmentNoteMixin, InProgressAppointmentMixin, FormView
+):
+    active_workflow_step = AppointmentWorkflowStepCompletion.StepNames.CHECK_INFORMATION
+    template_name = "mammograms/check_information/appointment_note.jinja"
+    form_class = AppointmentNoteForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        appointment = self.appointment
+        appointment_presenter = AppointmentPresenter(
+            appointment, tab_description="Note"
+        )
+
+        context.update(
+            {
+                "heading": "Appointment note",
+                "caption": appointment_presenter.participant.full_name,
+                "page_title": appointment_presenter.page_title,
+                "presented_appointment": appointment_presenter,
+                "secondary_nav_items": present_secondary_nav(
+                    appointment, current_tab="note"
+                ),
+                "return_url": self.get_success_url(),
+                "back_link_params": {
+                    "href": extract_relative_redirect_url(self.request)
+                },
+            }
+        )
+        return context
+
+    def get_success_url(self):
+        return extract_relative_redirect_url(
+            self.request,
+            default=reverse(
+                "mammograms:check_information", kwargs={"pk": self.kwargs["pk"]}
+            ),
         )
