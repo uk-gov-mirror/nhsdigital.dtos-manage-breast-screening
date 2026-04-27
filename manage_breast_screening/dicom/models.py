@@ -12,13 +12,14 @@ from manage_breast_screening.manual_images.models import (
     RepeatType,
     StudyCompleteness,
 )
+from manage_breast_screening.participants.models.appointment import Appointment
 
 
 def dicom_storage():
     return storages["dicom"]
 
 
-class Study(models.Model):
+class Study(BaseModel):
     class Meta:
         indexes = [
             models.Index(fields=["study_instance_uid"]),
@@ -27,6 +28,9 @@ class Study(models.Model):
         ]
 
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
+    appointment = models.OneToOneField(
+        Appointment, on_delete=models.PROTECT, related_name="dicom_study"
+    )
     study_instance_uid = models.CharField(max_length=128, unique=True)
     source_message_id = models.CharField(max_length=128)
     patient_id = models.CharField(max_length=10, blank=True)
@@ -52,14 +56,6 @@ class Study(models.Model):
         return Image.objects.filter(series__study=self).order_by(
             "series__series_number", "instance_number"
         )
-
-    @classmethod
-    def for_appointment(cls, appointment):
-        action = appointment.gateway_actions.first()
-        if not action:
-            return None
-
-        return cls.objects.filter(source_message_id=action.id).first()
 
     def series_with_multiple_images(self):
         return self.series.annotate(image_count=models.Count("images")).filter(
@@ -245,7 +241,7 @@ class ReadingSessionItem(BaseModel):
     study = models.ForeignKey(
         Study, on_delete=models.PROTECT, related_name="reading_session_items"
     )
-    order = models.IntegerField()
+    reading_order = models.IntegerField()
     reading = models.OneToOneField(
         Reading,
         on_delete=models.PROTECT,
@@ -254,4 +250,4 @@ class ReadingSessionItem(BaseModel):
     )
 
     class Meta:
-        unique_together = [("session", "order")]
+        unique_together = [("session", "reading_order")]
