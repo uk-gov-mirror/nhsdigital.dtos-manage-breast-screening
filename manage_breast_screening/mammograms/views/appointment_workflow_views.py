@@ -1,12 +1,15 @@
 import logging
 import time
+from datetime import date
 from functools import cached_property
 from urllib.parse import urlencode
 
+from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError, IntegrityError, transaction
+from django.db.models import Q
 from django.forms import Form
 from django.http import Http404, HttpResponse, StreamingHttpResponse
 from django.shortcuts import redirect, render
@@ -139,6 +142,44 @@ class ReviewMedicalInformationView(WorkflowSidebarMixin, FormView):
     )
     template_name = "mammograms/record_medical_information.jinja"
     form_class = RecordMedicalInformationForm
+
+    def dispatch(self, request, *args, **kwargs):
+        # Check for recent mammograms without a reason for continuing, which would indicate that the appointment should not proceed
+        recent_mammogram = self._get_recent_mammogram_without_reason(self.appointment)
+        if recent_mammogram:
+            return redirect(
+                reverse(
+                    "mammograms:appointment_should_not_proceed",
+                    kwargs={
+                        "appointment_pk": self.appointment.pk,
+                        "participant_reported_mammogram_pk": recent_mammogram.pk,
+                    },
+                )
+            )
+
+        return super().dispatch(request, *args, **kwargs)  # type: ignore
+
+    def _get_recent_mammogram_without_reason(self, appointment):
+        """
+        Returns the most recent reported mammogram for an appointment that occurred
+        within the last 6 months and has no reason for continuing, or None if no
+        such mammogram exists. Used to determine if an appointment should not proceed.
+        """
+        six_months_ago = date.today() - relativedelta(months=6)
+        return (
+            appointment.reported_mammograms.filter(
+                reason_for_continuing="",
+            )
+            .filter(
+                Q(date_type=ParticipantReportedMammogram.DateType.LESS_THAN_SIX_MONTHS)
+                | Q(
+                    date_type=ParticipantReportedMammogram.DateType.EXACT,
+                    exact_date__gt=six_months_ago,
+                )
+            )
+            .order_by("-created_at")
+            .first()
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
