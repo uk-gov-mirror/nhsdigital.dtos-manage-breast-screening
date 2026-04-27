@@ -2,7 +2,7 @@
 
 $_font-size: 16;
 
-.nhsuk-forward-link {
+.app-forward-link {
   background: none;
   border: 0;
   cursor: pointer;
@@ -15,7 +15,7 @@ $_font-size: 16;
   @include nhsuk-link-style-default;
   @include nhsuk-link-style-no-visited-state;
   @include nhsuk-responsive-margin(4, "top");
-  @include nhsuk-print-hide; // [2]
+  @include nhsuk-print-hide;
 
   &::before {
     bottom: 0;
@@ -29,6 +29,6 @@ $_font-size: 16;
   }
 }
 
-.nhsuk-forward-link--reverse {
+.app-forward-link--reverse {
   @include nhsuk-link-style-white;
 }

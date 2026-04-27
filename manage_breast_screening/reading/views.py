@@ -35,6 +35,10 @@ class ReadImageView(PermissionRequiredMixin, AppointmentMixin, FormView):
                     self.appointment
                 ),
                 "notes_for_reader": self.appointment.study.additional_details,
+                "is_urgent": True,
+                "is_second_read": True,
+                "is_previously_skipped": True,
+                "previous_case": True,
             },
         )
 

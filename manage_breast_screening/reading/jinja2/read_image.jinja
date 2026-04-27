@@ -11,10 +11,14 @@
 {% block beforeContent %}
 <div class="nhsuk-grid-row app-position-relative nhsuk-u-margin-bottom-3">
   <div class="nhsuk-grid-column-two-thirds">
-    <a href="#" class="nhsuk-back-link">Previous case</a>
-   </div>
-  <div class="nhsuk-grid-column-one-third app-align-right">
-    <a href="#" class="nhsuk-forward-link">Skip to next</a>
+    {% if previous_case %}
+      <a href="#" class="nhsuk-back-link">Previous case</a>
+    {% else %}
+      &nbsp;
+    {% endif %}
+  </div>
+  <div class="nhsuk-grid-column-one-third nhsuk-u-text-align-right">
+    <a href="#" class="app-forward-link">Skip to next</a>
   </div>
 </div>
 {% endblock beforeContent %}
@@ -32,20 +36,26 @@
         </h1>
       </div>
       <div class="nhsuk-grid-column-one-third app-header__status-tag">
+        {% if is_urgent %}
           <div class="nhsuk-u-margin-bottom-2">
             {{ tag({
             "html": "Urgent",
             "classes": "nhsuk-tag app-nowrap nhsuk-tag--red",
             }) }}
           </div>
+        {% endif %}
+        {% if is_second_read %}
           {{ tag({
           "html": "Second read",
           "classes": "nhsuk-tag app-nowrap nhsuk-tag--blue",
           }) }}
+        {% endif %}
+        {% if is_previously_skipped %}
           {{ tag({
           "html": "Previously skipped",
           "classes": "nhsuk-tag app-nowrap nhsuk-tag--grey",
           }) }}
+        {% endif %}
       </div>
     </div>
 
@@ -72,7 +82,7 @@
           <h2 class="nhsuk-heading-m">What is your opinion of these images?</h2>
 
           <div class="nhsuk-u-margin-bottom-4">
-            <button class="nhsuk-button app-button-full-width nhsuk-u-margin-bottom-3">
+            <button class="nhsuk-button nhsuk-u-width-full nhsuk-u-margin-bottom-3">
               Normal <span class="app-shortcut-hint">(N)</span>
             </button>
             <p class="nhsuk-u-margin-bottom-4">
@@ -81,13 +91,13 @@
           </div>
 
           <div class="nhsuk-u-margin-bottom-4">
-            <button class="nhsuk-button nhsuk-button--secondary app-button-full-width nhsuk-u-margin-bottom-3">
+            <button class="nhsuk-button nhsuk-button--secondary nhsuk-u-width-full nhsuk-u-margin-bottom-3">
             Technical recall <span class="app-shortcut-hint">(T)</span>
             </button>
           </div>
 
           <div class="nhsuk-u-margin-bottom-4">
-            <button class="nhsuk-button nhsuk-button--warning app-button-full-width">
+            <button class="nhsuk-button nhsuk-button--warning nhsuk-u-width-full">
             Recall for assessment <span class="app-shortcut-hint">(R)</span>
             </button>
           </div>
