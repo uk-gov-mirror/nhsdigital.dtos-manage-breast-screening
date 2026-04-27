@@ -15,7 +15,7 @@ from manage_breast_screening.participants.tests.factories import (
 
 
 @pytest.mark.django_db
-class TestAddBenignLumpHistoryView:
+class TestAddBenignLumpHistoryItemView:
     def test_renders_response(
         self, clinical_user_client, confirmed_identity_appointment
     ):
@@ -100,7 +100,7 @@ class TestAddBenignLumpHistoryView:
 
 
 @pytest.mark.django_db
-class TestChangeBenignLumpHistoryView:
+class TestUpdateBenignLumpHistoryItemView:
     @pytest.fixture
     def history_item(self, confirmed_identity_appointment):
         return BenignLumpHistoryItemFactory.create(
@@ -189,7 +189,7 @@ class TestChangeBenignLumpHistoryView:
 
 
 @pytest.mark.django_db
-class TestDeleteBenignLumpHistoryView:
+class TestDeleteBenignLumpHistoryItemView:
     @pytest.fixture
     def history_item(self, confirmed_identity_appointment):
         return BenignLumpHistoryItemFactory.create(

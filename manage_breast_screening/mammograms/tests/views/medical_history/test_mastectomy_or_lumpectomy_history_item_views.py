@@ -12,7 +12,7 @@ from manage_breast_screening.participants.tests.factories import (
 
 
 @pytest.mark.django_db
-class TestAddMastectomyOrLumpectomyHistoryView:
+class TestAddMastectomyOrLumpectomyHistoryItemView:
     def test_renders_response(
         self, clinical_user_client, confirmed_identity_appointment
     ):
@@ -106,7 +106,7 @@ class TestAddMastectomyOrLumpectomyHistoryView:
 
 
 @pytest.mark.django_db
-class TestUpdateMastectomyOrLumpectomyHistoryView:
+class TestUpdateMastectomyOrLumpectomyHistoryItemView:
     @pytest.fixture
     def history_item(self, confirmed_identity_appointment):
         return MastectomyOrLumpectomyHistoryItemFactory.create(
@@ -197,7 +197,7 @@ class TestUpdateMastectomyOrLumpectomyHistoryView:
 
 
 @pytest.mark.django_db
-class TestDeleteMastectomyOrLumpectomyHistoryView:
+class TestDeleteMastectomyOrLumpectomyHistoryItemView:
     @pytest.fixture
     def history_item(self, confirmed_identity_appointment):
         return MastectomyOrLumpectomyHistoryItemFactory.create(
