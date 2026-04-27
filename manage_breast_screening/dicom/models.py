@@ -167,7 +167,9 @@ class Reading(BaseModel):
     """
 
     study = models.ForeignKey(Study, on_delete=models.PROTECT, related_name="opinions")
-    reader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    reader = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="readings"
+    )
     opinion = models.CharField(choices=Opinions)
     additional_details = models.TextField(null=False, blank=True, default="")
 
@@ -221,7 +223,11 @@ class ReadingSession(BaseModel):
     A grouping of studies that are read by a reader in a single session
     """
 
-    reader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    reader = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="reading_sessions",
+    )
     session_size = models.IntegerField()
 
 
