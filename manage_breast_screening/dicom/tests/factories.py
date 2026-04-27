@@ -4,6 +4,10 @@ from factory.declarations import RelatedFactory, Sequence, SubFactory, Trait
 from factory.django import DjangoModelFactory, FileField
 from factory.helpers import post_generation
 
+from manage_breast_screening.participants.models.appointment import (
+    AppointmentStatusNames,
+)
+from manage_breast_screening.participants.tests.factories import AppointmentFactory
 from manage_breast_screening.users.tests.factories import UserFactory
 
 from .. import models
@@ -18,6 +22,9 @@ class StudyFactory(DjangoModelFactory):
     patient_id = Sequence(lambda n: f"999{n:07d}")
     date_and_time = None
     description = "Test Study"
+    appointment = SubFactory(
+        AppointmentFactory, current_status=AppointmentStatusNames.SCREENED
+    )
 
 
 class StudyWithImagesFactory(StudyFactory):
@@ -104,7 +111,7 @@ class ReadingSessionItemFactory(DjangoModelFactory):
         model = models.ReadingSessionItem
 
     study = SubFactory(StudyFactory)
-    order = Sequence(lambda i: i)
+    reading_order = Sequence(lambda i: i)
 
 
 class ReadingSessionFactory(DjangoModelFactory):

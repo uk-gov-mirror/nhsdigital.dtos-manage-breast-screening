@@ -22,8 +22,7 @@ class StudyService:
         Save additional details to the Study associated with the appointment's GatewayAction.
         Returns the updated Study, or None if no Study is found.
         """
-        study = Study.for_appointment(self.appointment)
-
+        study = getattr(self.appointment, "dicom_study", None)
         if not study:
             return None
 

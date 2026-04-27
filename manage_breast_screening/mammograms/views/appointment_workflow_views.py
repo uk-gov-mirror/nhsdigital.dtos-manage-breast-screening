@@ -29,7 +29,6 @@ from manage_breast_screening.core.utils.relative_redirects import (
     extract_relative_redirect_url,
 )
 from manage_breast_screening.core.views.generic import UpdateWithAuditView
-from manage_breast_screening.dicom.models import Study as DicomStudy
 from manage_breast_screening.dicom.study_service import (
     StudyService as DicomStudyService,
 )
@@ -226,7 +225,7 @@ class ReviewMedicalInformationView(WorkflowSidebarMixin, FormView):
             with transaction.atomic():
                 form.save()
                 WorklistItemService.create(self.appointment)
-        except (IntegrityError, DatabaseError):
+        except IntegrityError, DatabaseError:
             messages.add_message(
                 self.request,
                 messages.INFO,
@@ -392,7 +391,7 @@ class UpsertGatewayImagesView(WorkflowSidebarMixin, FormView):
             RecallService(appointment=self.appointment, current_user=self.request.user),
         )
 
-        study = DicomStudy.for_appointment(self.appointment)
+        study = self.appointment.dicom_study
 
         if study.has_series_with_multiple_images():
             return redirect(
@@ -417,7 +416,7 @@ class AddMultipleImagesInformationView(WorkflowSidebarMixin, FormView):
     def get_study(self):
         try:
             if gateway_images_enabled(self.appointment):
-                return DicomStudy.for_appointment(self.appointment)
+                return self.appointment.dicom_study
             else:
                 return self.appointment.study
         except Study.DoesNotExist:

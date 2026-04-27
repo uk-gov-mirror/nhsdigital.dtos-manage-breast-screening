@@ -20,7 +20,10 @@ class TestStudyService:
 
     def test_save_success(self, current_user):
         gateway_action = GatewayActionFactory()
-        study = StudyFactory(source_message_id=gateway_action.id)
+        study = StudyFactory(
+            source_message_id=gateway_action.id,
+            appointment=gateway_action.appointment,
+        )
 
         with patch.object(Auditor, "audit_update") as mock_audit_update:
             service = StudyService(gateway_action.appointment, current_user)
@@ -41,11 +44,6 @@ class TestStudyService:
         assert study.completeness == "complete"
         mock_audit_update.assert_called_once_with(study)
 
-    def test_save_no_action(self, current_user):
-        service = StudyService(MagicMock(), current_user)
-        result = service.save()
-        assert result is None
-
     def test_save_no_study(self, current_user):
         gateway_action = GatewayActionFactory()
         service = StudyService(gateway_action.appointment, current_user)
@@ -54,7 +52,9 @@ class TestStudyService:
 
     def test_update_additional_details(self, current_user):
         gateway_action = GatewayActionFactory()
-        study = StudyFactory(source_message_id=gateway_action.id)
+        study = StudyFactory(
+            source_message_id=gateway_action.id, appointment=gateway_action.appointment
+        )
 
         with patch.object(Auditor, "audit_update") as mock_audit_update:
             service = StudyService(gateway_action.appointment, current_user)
@@ -65,7 +65,7 @@ class TestStudyService:
         mock_audit_update.assert_called_once_with(study)
 
     def test_images_by_laterality_and_view(self):
-        action = GatewayActionFactory()
+        action = GatewayActionFactory.build()
         series = SeriesFactory.create(study__source_message_id=str(action.id))
         image1 = ImageFactory.create(series=series, view_position="CC", laterality="L")
         image2 = ImageFactory.create(series=series, view_position="CC", laterality="R")

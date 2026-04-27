@@ -34,7 +34,7 @@ class TestGetImagesForAppointment:
 
         assert not images.exists()
 
-    def test_returns_images_linked_via_gateway_action(self, _):
+    def test_returns_images_linked_to_appointment(self, _):
         appointment = AppointmentFactory()
         RelayFactory(setting=appointment.clinic_slot.clinic.setting)
 
@@ -43,6 +43,7 @@ class TestGetImagesForAppointment:
         study = Study.objects.create(
             study_instance_uid="1.2.826.0.1.1",  # gitleaks:allow
             source_message_id=str(action.id),
+            appointment=appointment,
         )
         series = Series.objects.create(
             study=study,

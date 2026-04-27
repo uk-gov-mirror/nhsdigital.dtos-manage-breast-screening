@@ -8,10 +8,13 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from ninja.testing import TestClient
 
 from manage_breast_screening.core.api import api
-from manage_breast_screening.dicom.dicom_recorder import DicomRecorder
 from manage_breast_screening.dicom.models import Study
 from manage_breast_screening.gateway.models import GatewayActionStatus
 from manage_breast_screening.gateway.tests.factories import GatewayActionFactory
+from manage_breast_screening.participants.models.appointment import (
+    AppointmentStatusNames,
+)
+from manage_breast_screening.participants.tests.factories import AppointmentFactory
 
 os.environ["NINJA_SKIP_REGISTRY"] = "yes"
 
@@ -28,14 +31,26 @@ def dicom_file(dataset) -> bytes:
         )
 
 
+@pytest.fixture
+def appointment_stub():
+    return AppointmentFactory.stub(
+        is_in_progress=MagicMock(return_value=True),
+    )
+
+
 @pytest.mark.django_db
 def test_upload_success(dataset, dicom_file, monkeypatch):
     monkeypatch.setenv("API_ENABLED", "true")
     monkeypatch.setenv("API_AUTH_TOKEN", "testtoken")
 
-    with patch.object(DicomRecorder, "appointment_in_progress", return_value=True):
+    appointment = AppointmentFactory(current_status=AppointmentStatusNames.IN_PROGRESS)
+
+    with patch(
+        "manage_breast_screening.dicom.dicom_recorder.lookup_appointment",
+        return_value=appointment,
+    ):
         response = client.put(
-            "/dicom/abc123",
+            f"/dicom/{appointment.pk}",
             FILES={"file": dicom_file},
             headers={"Authorization": "Bearer " + os.getenv("API_AUTH_TOKEN", "")},
         )
@@ -47,7 +62,7 @@ def test_upload_success(dataset, dicom_file, monkeypatch):
         assert json["series_instance_uid"] == dataset.SeriesInstanceUID
         assert json["sop_instance_uid"] == dataset.SOPInstanceUID
         assert json["instance_id"] == str(study.images().first().id)
-        assert study.source_message_id == "abc123"
+        assert study.source_message_id == str(appointment.pk)
 
 
 def test_upload_no_file(monkeypatch):
@@ -63,7 +78,7 @@ def test_upload_no_file(monkeypatch):
     assert response.status_code == 422
 
 
-def test_upload_invalid_file(monkeypatch):
+def test_upload_invalid_file(monkeypatch, appointment_stub):
     monkeypatch.setenv("API_ENABLED", "true")
     monkeypatch.setenv("API_AUTH_TOKEN", "testtoken")
 
@@ -71,7 +86,10 @@ def test_upload_invalid_file(monkeypatch):
         "invalid.dcm", b"not a dicom file", content_type="application/dicom"
     )
 
-    with patch.object(DicomRecorder, "appointment_in_progress", return_value=True):
+    with patch(
+        "manage_breast_screening.dicom.dicom_recorder.lookup_appointment",
+        return_value=appointment_stub,
+    ):
         response = client.put(
             "/dicom/abc123",
             FILES={"file": invalid_file},
@@ -102,7 +120,7 @@ def test_upload_file_thats_too_large(monkeypatch):
     assert response.json()["detail"] == "The file cannot be larger than 100MB"
 
 
-def test_upload_missing_uids(dataset, monkeypatch):
+def test_upload_missing_uids(dataset, monkeypatch, appointment_stub):
     monkeypatch.setenv("API_ENABLED", "true")
     monkeypatch.setenv("API_AUTH_TOKEN", "testtoken")
 
@@ -117,7 +135,10 @@ def test_upload_missing_uids(dataset, monkeypatch):
             "temp.dcm", buffer.read(), content_type="application/dicom"
         )
 
-    with patch.object(DicomRecorder, "appointment_in_progress", return_value=True):
+    with patch(
+        "manage_breast_screening.dicom.dicom_recorder.lookup_appointment",
+        return_value=appointment_stub,
+    ):
         response = client.put(
             "/dicom/abc123",
             FILES={"file": dicom_file},
@@ -133,11 +154,16 @@ def test_upload_missing_uids(dataset, monkeypatch):
     )
 
 
-def test_upload_appointment_not_in_progress(dicom_file, monkeypatch):
+def test_upload_appointment_not_in_progress(dicom_file, monkeypatch, appointment_stub):
     monkeypatch.setenv("API_ENABLED", "true")
     monkeypatch.setenv("API_AUTH_TOKEN", "testtoken")
 
-    with patch.object(DicomRecorder, "appointment_in_progress", return_value=False):
+    appointment_stub.is_in_progress.return_value = False
+
+    with patch(
+        "manage_breast_screening.dicom.dicom_recorder.lookup_appointment",
+        return_value=appointment_stub,
+    ):
         response = client.put(
             "/dicom/abc123",
             FILES={"file": dicom_file},

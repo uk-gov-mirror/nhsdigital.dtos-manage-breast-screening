@@ -1,12 +1,10 @@
 import pytest
 
-from manage_breast_screening.dicom.models import Study
 from manage_breast_screening.dicom.tests.factories import (
     ImageFactory,
     SeriesFactory,
     StudyFactory,
 )
-from manage_breast_screening.gateway.tests.factories import GatewayActionFactory
 
 
 @pytest.mark.django_db
@@ -33,12 +31,6 @@ class TestStudy:
         ImageFactory.create(series__study=study)
 
         assert study.has_series_with_multiple_images() is False
-
-    def test_study_for_appointment(self):
-        study = StudyFactory.create()
-        action = GatewayActionFactory.create(id=study.source_message_id)
-
-        assert Study.for_appointment(action.appointment) == study
 
 
 @pytest.mark.django_db
