@@ -25,3 +25,6 @@ class CoreConfig(AppConfig):
         from manage_breast_screening.core.feature_flags import setup_feature_flags
 
         setup_feature_flags(_FLAGS_YAML)
+
+        # import this explicitly to avoid a crash on boot caused by a race between debug_toolbar's autoreload thread and the main one
+        import ninja  # noqa: F401
