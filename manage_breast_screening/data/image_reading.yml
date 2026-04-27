@@ -525,8 +525,8 @@ studies:
 reading_sessions:
   - id: 16fdfca7-cbe9-4e0c-8700-2ce070ede415
     reader:
-      first_name: Janet
-      last_name: Clarke
+      first_name: Beverley
+      last_name: Wilson
     session_size: 3
     items:
       - study_id: c6ff5cea-a5b8-4823-b307-e5faf587b474
@@ -551,8 +551,8 @@ reading_sessions:
 
   - id: e27aac8c-ec7f-4f50-9e35-d5ceabb74f0d
     reader:
-      first_name: Fiona
-      last_name: Campbell
+      first_name: Lottie
+      last_name: Hughes
     session_size: 2
     items:
       - study_id: c6ff5cea-a5b8-4823-b307-e5faf587b474
