@@ -1,27 +1,24 @@
-from urllib.parse import urlencode
-
 import pytest
 from django.contrib import messages
-from django.http import QueryDict
 from django.urls import reverse
 from pytest_django.asserts import assertInHTML, assertMessages, assertRedirects
 
-from manage_breast_screening.participants.models.medical_history.breast_augmentation_history_item import (
-    BreastAugmentationHistoryItem,
+from manage_breast_screening.participants.models.medical_history.implanted_medical_device_history_item import (
+    ImplantedMedicalDeviceHistoryItem,
 )
 from manage_breast_screening.participants.tests.factories import (
-    BreastAugmentationHistoryItemFactory,
+    ImplantedMedicalDeviceHistoryItemFactory,
 )
 
 
 @pytest.mark.django_db
-class TestAddBreastAugmentationHistoryView:
+class TestAddImplantedMedicalDeviceHistoryItemView:
     def test_renders_response(
         self, clinical_user_client, confirmed_identity_appointment
     ):
         response = clinical_user_client.http.get(
             reverse(
-                "mammograms:add_breast_augmentation_history_item",
+                "mammograms:add_implanted_medical_device_history_item",
                 kwargs={"pk": confirmed_identity_appointment.pk},
             )
         )
@@ -32,12 +29,11 @@ class TestAddBreastAugmentationHistoryView:
     ):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:add_breast_augmentation_history_item",
+                "mammograms:add_implanted_medical_device_history_item",
                 kwargs={"pk": confirmed_identity_appointment.pk},
             ),
             {
-                "left_breast_procedures": BreastAugmentationHistoryItem.Procedure.BREAST_IMPLANTS,
-                "right_breast_procedures": BreastAugmentationHistoryItem.Procedure.BREAST_IMPLANTS,
+                "device": ImplantedMedicalDeviceHistoryItem.Device.CARDIAC_DEVICE,
             },
         )
         assertRedirects(
@@ -52,7 +48,7 @@ class TestAddBreastAugmentationHistoryView:
             [
                 messages.Message(
                     level=messages.SUCCESS,
-                    message="Added breast implants or augmentation",
+                    message="Added implanted medical device",
                 )
             ],
         )
@@ -62,7 +58,7 @@ class TestAddBreastAugmentationHistoryView:
     ):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:add_breast_augmentation_history_item",
+                "mammograms:add_implanted_medical_device_history_item",
                 kwargs={"pk": confirmed_identity_appointment.pk},
             ),
             {},
@@ -71,32 +67,10 @@ class TestAddBreastAugmentationHistoryView:
         assertInHTML(
             """
                 <ul class="nhsuk-list nhsuk-error-summary__list">
-                    <li><a href="#id_right_breast_procedures">Select procedures for the right breast</a></li>
-                    <li><a href="#id_left_breast_procedures">Select procedures for the left breast</a></li>
+                    <li><a href="#id_device">Select the device type</a></li>
                 </ul>
             """,
             response.text,
-        )
-
-    def test_redirects_if_already_exists(
-        self, clinical_user_client, confirmed_identity_appointment
-    ):
-        BreastAugmentationHistoryItemFactory.create(
-            appointment=confirmed_identity_appointment
-        )
-
-        response = clinical_user_client.http.get(
-            reverse(
-                "mammograms:add_breast_augmentation_history_item",
-                kwargs={"pk": confirmed_identity_appointment.pk},
-            )
-        )
-        assertRedirects(
-            response,
-            reverse(
-                "mammograms:record_medical_information",
-                kwargs={"pk": confirmed_identity_appointment.pk},
-            ),
         )
 
     def test_identity_confirmed_step_incomplete(
@@ -104,7 +78,7 @@ class TestAddBreastAugmentationHistoryView:
     ):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:add_breast_augmentation_history_item",
+                "mammograms:add_implanted_medical_device_history_item",
                 kwargs={"pk": in_progress_appointment.pk},
             )
         )
@@ -118,19 +92,20 @@ class TestAddBreastAugmentationHistoryView:
 
 
 @pytest.mark.django_db
-class TestChangeBreastAugmentationHistoryView:
+class TestUpdateImplantedMedicalDeviceHistoryItemView:
     @pytest.fixture
     def history_item(self, confirmed_identity_appointment):
-        return BreastAugmentationHistoryItemFactory.create(
-            appointment=confirmed_identity_appointment
+        return ImplantedMedicalDeviceHistoryItemFactory.create(
+            appointment=confirmed_identity_appointment,
+            device=ImplantedMedicalDeviceHistoryItem.Device.CARDIAC_DEVICE,
         )
 
     def test_renders_response(self, clinical_user_client, history_item):
         response = clinical_user_client.http.get(
             reverse(
-                "mammograms:update_breast_augmentation_history_item",
+                "mammograms:update_implanted_medical_device_history_item",
                 kwargs={
-                    "pk": history_item.appointment_id,
+                    "pk": history_item.appointment.pk,
                     "history_item_pk": history_item.pk,
                 },
             )
@@ -138,35 +113,25 @@ class TestChangeBreastAugmentationHistoryView:
         assert response.status_code == 200
 
     def test_valid_post_redirects_to_appointment(
-        self, clinical_user_client, history_item
+        self, clinical_user_client, confirmed_identity_appointment, history_item
     ):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:update_breast_augmentation_history_item",
+                "mammograms:update_implanted_medical_device_history_item",
                 kwargs={
-                    "pk": history_item.appointment_id,
+                    "pk": confirmed_identity_appointment.pk,
                     "history_item_pk": history_item.pk,
                 },
             ),
-            QueryDict(
-                urlencode(
-                    {
-                        "left_breast_procedures": [
-                            BreastAugmentationHistoryItem.Procedure.BREAST_IMPLANTS
-                        ],
-                        "right_breast_procedures": [
-                            BreastAugmentationHistoryItem.Procedure.BREAST_IMPLANTS
-                        ],
-                    },
-                    doseq=True,
-                )
-            ),
+            {
+                "device": ImplantedMedicalDeviceHistoryItem.Device.CARDIAC_DEVICE,
+            },
         )
         assertRedirects(
             response,
             reverse(
                 "mammograms:record_medical_information",
-                kwargs={"pk": history_item.appointment_id},
+                kwargs={"pk": confirmed_identity_appointment.pk},
             ),
         )
         assertMessages(
@@ -174,7 +139,7 @@ class TestChangeBreastAugmentationHistoryView:
             [
                 messages.Message(
                     level=messages.SUCCESS,
-                    message="Updated breast implants or augmentation",
+                    message="Updated implanted medical device",
                 )
             ],
         )
@@ -182,12 +147,12 @@ class TestChangeBreastAugmentationHistoryView:
     def test_identity_confirmed_step_incomplete(
         self, clinical_user_client, in_progress_appointment
     ):
-        history_item = BreastAugmentationHistoryItemFactory.create(
+        history_item = ImplantedMedicalDeviceHistoryItemFactory.create(
             appointment=in_progress_appointment
         )
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:update_breast_augmentation_history_item",
+                "mammograms:update_implanted_medical_device_history_item",
                 kwargs={
                     "pk": history_item.appointment_id,
                     "history_item_pk": history_item.pk,
@@ -204,17 +169,17 @@ class TestChangeBreastAugmentationHistoryView:
 
 
 @pytest.mark.django_db
-class TestDeleteBreastAugmentationHistoryView:
+class TestDeleteImplantedMedicalDeviceHistoryItemView:
     @pytest.fixture
     def history_item(self, confirmed_identity_appointment):
-        return BreastAugmentationHistoryItemFactory.create(
+        return ImplantedMedicalDeviceHistoryItemFactory.create(
             appointment=confirmed_identity_appointment
         )
 
     def test_get_renders_response(self, clinical_user_client, history_item):
         response = clinical_user_client.http.get(
             reverse(
-                "mammograms:delete_breast_augmentation_history_item",
+                "mammograms:delete_implanted_medical_device_history_item",
                 kwargs={
                     "pk": history_item.appointment.pk,
                     "history_item_pk": history_item.pk,
@@ -228,7 +193,7 @@ class TestDeleteBreastAugmentationHistoryView:
     ):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:delete_breast_augmentation_history_item",
+                "mammograms:delete_implanted_medical_device_history_item",
                 kwargs={
                     "pk": history_item.appointment.pk,
                     "history_item_pk": history_item.pk,
@@ -247,7 +212,7 @@ class TestDeleteBreastAugmentationHistoryView:
             [
                 messages.Message(
                     level=messages.SUCCESS,
-                    message="Deleted breast implants or augmentation",
+                    message="Deleted implanted medical device",
                 )
             ],
         )
@@ -255,7 +220,7 @@ class TestDeleteBreastAugmentationHistoryView:
     def test_the_history_item_is_deleted(self, clinical_user_client, history_item):
         clinical_user_client.http.post(
             reverse(
-                "mammograms:delete_breast_augmentation_history_item",
+                "mammograms:delete_implanted_medical_device_history_item",
                 kwargs={
                     "pk": history_item.appointment.pk,
                     "history_item_pk": history_item.pk,
@@ -263,19 +228,19 @@ class TestDeleteBreastAugmentationHistoryView:
             )
         )
 
-        assert not BreastAugmentationHistoryItem.objects.filter(
+        assert not ImplantedMedicalDeviceHistoryItem.objects.filter(
             pk=history_item.pk
         ).exists()
 
     def test_identity_confirmed_step_incomplete(
         self, clinical_user_client, in_progress_appointment
     ):
-        history_item = BreastAugmentationHistoryItemFactory.create(
+        history_item = ImplantedMedicalDeviceHistoryItemFactory.create(
             appointment=in_progress_appointment
         )
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:delete_breast_augmentation_history_item",
+                "mammograms:delete_implanted_medical_device_history_item",
                 kwargs={
                     "pk": in_progress_appointment.pk,
                     "history_item_pk": history_item.pk,
@@ -289,4 +254,6 @@ class TestDeleteBreastAugmentationHistoryView:
                 kwargs={"pk": in_progress_appointment.pk},
             ),
         )
-        assert BreastAugmentationHistoryItem.objects.filter(pk=history_item.pk).exists()
+        assert ImplantedMedicalDeviceHistoryItem.objects.filter(
+            pk=history_item.pk
+        ).exists()

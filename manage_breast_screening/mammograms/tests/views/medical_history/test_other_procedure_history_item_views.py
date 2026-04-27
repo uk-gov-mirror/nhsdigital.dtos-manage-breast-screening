@@ -12,7 +12,7 @@ from manage_breast_screening.participants.tests.factories import (
 
 
 @pytest.mark.django_db
-class TestAddOtherProcedureView:
+class TestAddOtherProcedureHistoryItemView:
     def test_renders_response(
         self, clinical_user_client, confirmed_identity_appointment
     ):
@@ -93,7 +93,7 @@ class TestAddOtherProcedureView:
 
 
 @pytest.mark.django_db
-class TestChangeOtherProcedureView:
+class TestUpdateOtherProcedureHistoryItemView:
     @pytest.fixture
     def history_item(self, confirmed_identity_appointment):
         return OtherProcedureHistoryItemFactory.create(

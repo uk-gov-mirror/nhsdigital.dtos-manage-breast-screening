@@ -3,56 +3,58 @@ from django.contrib import messages
 from django.urls import reverse
 from pytest_django.asserts import assertInHTML, assertMessages, assertRedirects
 
-from manage_breast_screening.participants.models.medical_history.breast_cancer_history_item import (
-    BreastCancerHistoryItem,
+from manage_breast_screening.participants.models.medical_history.cyst_history_item import (
+    CystHistoryItem,
 )
 from manage_breast_screening.participants.tests.factories import (
-    BreastCancerHistoryItemFactory,
+    CystHistoryItemFactory,
 )
-
-
-@pytest.fixture
-def history_item(confirmed_identity_appointment):
-    return BreastCancerHistoryItemFactory.create(
-        appointment=confirmed_identity_appointment
-    )
 
 
 @pytest.mark.django_db
-class TestBreastCancerHistoryView:
+class TestAddCystHistoryItemView:
     def test_renders_response(
         self, clinical_user_client, confirmed_identity_appointment
     ):
         response = clinical_user_client.http.get(
             reverse(
-                "mammograms:add_breast_cancer_history_item",
+                "mammograms:add_cyst_history_item",
                 kwargs={"pk": confirmed_identity_appointment.pk},
             )
         )
         assert response.status_code == 200
+
+    def test_redirects_if_already_exists(
+        self, clinical_user_client, confirmed_identity_appointment
+    ):
+        CystHistoryItemFactory.create(appointment=confirmed_identity_appointment)
+
+        response = clinical_user_client.http.get(
+            reverse(
+                "mammograms:add_cyst_history_item",
+                kwargs={"pk": confirmed_identity_appointment.pk},
+            )
+        )
+        assertRedirects(
+            response,
+            reverse(
+                "mammograms:record_medical_information",
+                kwargs={"pk": confirmed_identity_appointment.pk},
+            ),
+        )
 
     def test_valid_post_redirects_to_appointment(
         self, clinical_user_client, confirmed_identity_appointment
     ):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:add_breast_cancer_history_item",
+                "mammograms:add_cyst_history_item",
                 kwargs={"pk": confirmed_identity_appointment.pk},
             ),
             {
-                "diagnosis_location": "RIGHT_BREAST",
-                "intervention_location": "NHS_HOSPITAL",
-                "intervention_location_details_nhs_hospital": "abc",
-                "left_breast_other_surgery": "NO_SURGERY",
-                "left_breast_procedure": "NO_PROCEDURE",
-                "left_breast_treatment": "NO_RADIOTHERAPY",
-                "right_breast_other_surgery": "LYMPH_NODE_SURGERY",
-                "right_breast_procedure": "LUMPECTOMY",
-                "right_breast_treatment": "BREAST_RADIOTHERAPY",
-                "systemic_treatments": "NO_SYSTEMIC_TREATMENTS",
+                "treatment": CystHistoryItem.Treatment.DRAINAGE_OR_REMOVAL,
             },
         )
-
         assertRedirects(
             response,
             reverse(
@@ -65,7 +67,7 @@ class TestBreastCancerHistoryView:
             [
                 messages.Message(
                     level=messages.SUCCESS,
-                    message="Added breast cancer",
+                    message="Added cysts",
                 )
             ],
         )
@@ -75,26 +77,17 @@ class TestBreastCancerHistoryView:
     ):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:add_breast_cancer_history_item",
+                "mammograms:add_cyst_history_item",
                 kwargs={"pk": confirmed_identity_appointment.pk},
             ),
             {},
         )
-
         assert response.status_code == 200
         assertInHTML(
             """
-            <ul class="nhsuk-list nhsuk-error-summary__list">
-                <li><a href="#id_diagnosis_location">Select which breasts cancer was diagnosed in</a></li>
-                <li><a href="#id_right_breast_procedure">Select which procedure they have had in the right breast</a></li>
-                <li><a href="#id_left_breast_procedure">Select which procedure they have had in the left breast</a></li>
-                <li><a href="#id_right_breast_other_surgery">Select any other surgery they have had in the right breast</a></li>
-                <li><a href="#id_left_breast_other_surgery">Select any other surgery they have had in the left breast</a></li>
-                <li><a href="#id_right_breast_treatment">Select what treatment they have had in the right breast</a></li>
-                <li><a href="#id_left_breast_treatment">Select what treatment they have had in the left breast</a></li>
-                <li><a href="#id_systemic_treatments">Select what systemic treatments they have had</a></li>
-                <li><a href="#id_intervention_location">Select where surgery and treatment took place</a></li>
-            </ul>
+                <ul class="nhsuk-list nhsuk-error-summary__list">
+                    <li><a href="#id_treatment">Select the treatment type</a></li>
+                </ul>
             """,
             response.text,
         )
@@ -104,7 +97,7 @@ class TestBreastCancerHistoryView:
     ):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:add_breast_cancer_history_item",
+                "mammograms:add_cyst_history_item",
                 kwargs={"pk": in_progress_appointment.pk},
             )
         )
@@ -118,13 +111,20 @@ class TestBreastCancerHistoryView:
 
 
 @pytest.mark.django_db
-class TestBreastCancerHistoryUpdateView:
+class TestUpdateCystHistoryItemView:
+    @pytest.fixture
+    def history_item(self, confirmed_identity_appointment):
+        return CystHistoryItemFactory.create(
+            appointment=confirmed_identity_appointment,
+            treatment=CystHistoryItem.Treatment.NO_TREATMENT,
+        )
+
     def test_renders_response(self, clinical_user_client, history_item):
         response = clinical_user_client.http.get(
             reverse(
-                "mammograms:update_breast_cancer_history_item",
+                "mammograms:update_cyst_history_item",
                 kwargs={
-                    "pk": history_item.appointment_id,
+                    "pk": history_item.appointment.pk,
                     "history_item_pk": history_item.pk,
                 },
             )
@@ -132,35 +132,25 @@ class TestBreastCancerHistoryUpdateView:
         assert response.status_code == 200
 
     def test_valid_post_redirects_to_appointment(
-        self, clinical_user_client, history_item
+        self, clinical_user_client, confirmed_identity_appointment, history_item
     ):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:update_breast_cancer_history_item",
+                "mammograms:update_cyst_history_item",
                 kwargs={
-                    "pk": history_item.appointment_id,
+                    "pk": confirmed_identity_appointment.pk,
                     "history_item_pk": history_item.pk,
                 },
             ),
             {
-                "diagnosis_location": "RIGHT_BREAST",
-                "intervention_location": "NHS_HOSPITAL",
-                "intervention_location_details_nhs_hospital": "abc",
-                "left_breast_other_surgery": "NO_SURGERY",
-                "left_breast_procedure": "NO_PROCEDURE",
-                "left_breast_treatment": "NO_RADIOTHERAPY",
-                "right_breast_other_surgery": "LYMPH_NODE_SURGERY",
-                "right_breast_procedure": "LUMPECTOMY",
-                "right_breast_treatment": "BREAST_RADIOTHERAPY",
-                "systemic_treatments": "NO_SYSTEMIC_TREATMENTS",
+                "treatment": CystHistoryItem.Treatment.DRAINAGE_OR_REMOVAL,
             },
         )
-
         assertRedirects(
             response,
             reverse(
                 "mammograms:record_medical_information",
-                kwargs={"pk": history_item.appointment_id},
+                kwargs={"pk": confirmed_identity_appointment.pk},
             ),
         )
         assertMessages(
@@ -168,7 +158,7 @@ class TestBreastCancerHistoryUpdateView:
             [
                 messages.Message(
                     level=messages.SUCCESS,
-                    message="Updated breast cancer",
+                    message="Updated cysts",
                 )
             ],
         )
@@ -176,12 +166,12 @@ class TestBreastCancerHistoryUpdateView:
     def test_identity_confirmed_step_incomplete(
         self, clinical_user_client, in_progress_appointment
     ):
-        history_item = BreastCancerHistoryItemFactory.create(
+        history_item = CystHistoryItemFactory.create(
             appointment=in_progress_appointment
         )
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:update_breast_cancer_history_item",
+                "mammograms:update_cyst_history_item",
                 kwargs={
                     "pk": history_item.appointment_id,
                     "history_item_pk": history_item.pk,
@@ -198,11 +188,15 @@ class TestBreastCancerHistoryUpdateView:
 
 
 @pytest.mark.django_db
-class TestDeleteSymptomView:
+class TestDeleteCystHistoryItemView:
+    @pytest.fixture
+    def history_item(self, confirmed_identity_appointment):
+        return CystHistoryItemFactory.create(appointment=confirmed_identity_appointment)
+
     def test_get_renders_response(self, clinical_user_client, history_item):
         response = clinical_user_client.http.get(
             reverse(
-                "mammograms:delete_breast_cancer_history_item",
+                "mammograms:delete_cyst_history_item",
                 kwargs={
                     "pk": history_item.appointment.pk,
                     "history_item_pk": history_item.pk,
@@ -216,7 +210,7 @@ class TestDeleteSymptomView:
     ):
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:delete_breast_cancer_history_item",
+                "mammograms:delete_cyst_history_item",
                 kwargs={
                     "pk": history_item.appointment.pk,
                     "history_item_pk": history_item.pk,
@@ -235,15 +229,15 @@ class TestDeleteSymptomView:
             [
                 messages.Message(
                     level=messages.SUCCESS,
-                    message="Deleted breast cancer",
+                    message="Deleted cysts",
                 )
             ],
         )
 
-    def test_the_symptom_is_deleted(self, clinical_user_client, history_item):
+    def test_the_history_item_is_deleted(self, clinical_user_client, history_item):
         clinical_user_client.http.post(
             reverse(
-                "mammograms:delete_breast_cancer_history_item",
+                "mammograms:delete_cyst_history_item",
                 kwargs={
                     "pk": history_item.appointment.pk,
                     "history_item_pk": history_item.pk,
@@ -251,17 +245,17 @@ class TestDeleteSymptomView:
             )
         )
 
-        assert not BreastCancerHistoryItem.objects.filter(pk=history_item.pk).exists()
+        assert not CystHistoryItem.objects.filter(pk=history_item.pk).exists()
 
     def test_identity_confirmed_step_incomplete(
         self, clinical_user_client, in_progress_appointment
     ):
-        history_item = BreastCancerHistoryItemFactory.create(
+        history_item = CystHistoryItemFactory.create(
             appointment=in_progress_appointment
         )
         response = clinical_user_client.http.post(
             reverse(
-                "mammograms:delete_breast_cancer_history_item",
+                "mammograms:delete_cyst_history_item",
                 kwargs={
                     "pk": in_progress_appointment.pk,
                     "history_item_pk": history_item.pk,
@@ -275,4 +269,4 @@ class TestDeleteSymptomView:
                 kwargs={"pk": in_progress_appointment.pk},
             ),
         )
-        assert BreastCancerHistoryItem.objects.filter(pk=history_item.pk).exists()
+        assert CystHistoryItem.objects.filter(pk=history_item.pk).exists()

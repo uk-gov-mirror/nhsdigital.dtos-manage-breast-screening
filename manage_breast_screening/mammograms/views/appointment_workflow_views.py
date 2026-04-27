@@ -240,9 +240,9 @@ class ReviewMedicalInformationView(WorkflowSidebarMixin, FormView):
             logger.warning(str(e))
 
         if gateway_images_enabled(self.appointment):
-            return redirect("mammograms:gateway_images", pk=self.appointment.pk)
+            return redirect("mammograms:upsert_gateway_images", pk=self.appointment.pk)
 
-        return redirect("mammograms:take_images", pk=self.appointment.pk)
+        return redirect("mammograms:upsert_images", pk=self.appointment.pk)
 
 
 class ConfirmAppointmentCannotGoAheadView(InProgressAppointmentMixin, FormView):
@@ -349,7 +349,7 @@ class UpsertImagesView(WorkflowSidebarMixin, FormView):
                 )
             case _:
                 return redirect(
-                    "mammograms:appointment_cannot_go_ahead",
+                    "mammograms:confirm_appointment_cannot_go_ahead",
                     pk=self.appointment_pk,
                 )
 
@@ -482,7 +482,7 @@ class AddMultipleImagesInformationView(WorkflowSidebarMixin, FormView):
     def get_redirect_back_url(self):
         if gateway_images_enabled(self.appointment):
             return reverse(
-                "mammograms:gateway_images", kwargs={"pk": self.appointment_pk}
+                "mammograms:upsert_gateway_images", kwargs={"pk": self.appointment_pk}
             )
         else:
             return reverse(
@@ -548,7 +548,7 @@ class UpsertBreastFeaturesView(InProgressAppointmentMixin, FormView):
                     )
                 },
                 "cannot_proceed_url": reverse(
-                    "mammograms:appointment_cannot_go_ahead",
+                    "mammograms:confirm_appointment_cannot_go_ahead",
                     kwargs={"pk": self.appointment_pk},
                 ),
             }
@@ -674,9 +674,9 @@ def resume_appointment_view(request, pk):
             in completed_steps
         ):
             if gateway_images_enabled(appointment):
-                next_step = "mammograms:gateway_images"
+                next_step = "mammograms:upsert_gateway_images"
             else:
-                next_step = "mammograms:take_images"
+                next_step = "mammograms:upsert_images"
         else:
             next_step = "mammograms:record_medical_information"
 
@@ -808,7 +808,7 @@ def appointment_should_not_proceed_view(
     return_url = extract_relative_redirect_url(request, default="")
     update_previous_mammogram_url = (
         reverse(
-            "mammograms:update_previous_mammogram",
+            "mammograms:update_participant_reported_mammogram",
             kwargs={
                 "pk": appointment_pk,
                 "participant_reported_mammogram_pk": participant_reported_mammogram_pk,
@@ -819,7 +819,7 @@ def appointment_should_not_proceed_view(
     )
     proceed_anyway_url = (
         reverse(
-            "mammograms:proceed_anyway",
+            "mammograms:confirm_appointment_proceed_anyway",
             kwargs={
                 "pk": appointment_pk,
                 "participant_reported_mammogram_pk": participant_reported_mammogram_pk,
@@ -1040,7 +1040,7 @@ class CheckInformationView(WorkflowSidebarMixin, TemplateView):
         )
 
 
-class UpsertAppointmentNoteView(
+class UpsertWorkflowAppointmentNoteView(
     AppointmentNoteMixin, InProgressAppointmentMixin, FormView
 ):
     active_workflow_step = AppointmentWorkflowStepCompletion.StepNames.CHECK_INFORMATION
