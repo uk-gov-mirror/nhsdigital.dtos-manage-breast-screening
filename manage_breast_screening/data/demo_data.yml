@@ -82,6 +82,9 @@ demo_data:
         - first_name: Beverley
           last_name: Wilson
           role: Reader
+        - first_name: Lottie
+          last_name: Hughes
+          role: Reader
       settings:
         - name: 'East Tester Road Campus'
           id: 7e1d2c3b-4a5f-6e7d-8c9b-0a1f2e3d4c5b
