@@ -34,13 +34,17 @@ module "webapp" {
   enable_entra_id_authentication   = var.enable_entra_id_authentication
   app_key_vault_id                 = var.app_key_vault_id
   docker_image                     = var.docker_image
-  user_assigned_identity_ids       = var.deploy_database_as_container ? [] : [module.db_connect_identity[0].id]
+  user_assigned_identity_ids = flatten([
+    var.deploy_database_as_container ? [] : [module.db_connect_identity[0].id],
+    var.relay_namespace_name != null ? [module.relay_send_identity[0].id] : []
+  ])
   environment_variables = merge(
     local.common_env,
     {
       ALLOWED_HOSTS = "${var.app_short_name}-web-${var.environment}.${var.default_domain},localhost,127.0.0.1"
     },
-    var.deploy_database_as_container ? local.container_db_env : local.azure_db_env
+    var.deploy_database_as_container ? local.container_db_env : local.azure_db_env,
+    var.relay_namespace_name != null ? { AZURE_RELAY_CLIENT_ID = module.relay_send_identity[0].client_id } : {}
   )
   secret_variables = merge(
     { APPLICATIONINSIGHTS_CONNECTION_STRING = var.app_insights_connection_string },

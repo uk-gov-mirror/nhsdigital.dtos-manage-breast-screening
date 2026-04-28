@@ -42,6 +42,10 @@ output "relay_namespace_name" {
   value = var.enable_relay ? module.relay_namespace[0].name : null
 }
 
+output "relay_namespace_id" {
+  value = var.enable_relay ? module.relay_namespace[0].id : null
+}
+
 output "servicebus_namespace_name" {
   value = var.enable_service_bus ? module.servicebus_namespace[0].namespace_name : null
 }

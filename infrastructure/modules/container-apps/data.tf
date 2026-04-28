@@ -26,3 +26,4 @@ data "azurerm_private_dns_zone" "storage-account-queue" {
   name                = "privatelink.queue.core.windows.net"
   resource_group_name = "rg-hub-${var.hub}-uks-private-dns-zones"
 }
+
