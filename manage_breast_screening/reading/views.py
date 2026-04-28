@@ -1,8 +1,10 @@
+from logging import getLogger
+
 from django.contrib.auth.decorators import permission_required
 from django.forms import Form
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
-from django.views.generic import FormView
+from django.views.generic import FormView, TemplateView
 from rules.contrib.views import PermissionRequiredMixin
 
 from manage_breast_screening.auth.models import Permission
@@ -10,6 +12,8 @@ from manage_breast_screening.mammograms.presenters.medical_history.check_medical
     CheckMedicalInformationPresenter,
 )
 from manage_breast_screening.mammograms.views.mixins import AppointmentMixin
+
+logger = getLogger(__name__)
 
 
 @require_http_methods(["GET"])
@@ -61,3 +65,17 @@ class ReadImageView(PermissionRequiredMixin, AppointmentMixin, FormView):
                 )
 
         return images
+
+
+class AddTechnicalRecallView(TemplateView):
+    template_name = "reading/technical_recall.jinja"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "page_title": "Technical recall",
+                "back_link_params": {"href": "#"},
+            }
+        )
+        return context

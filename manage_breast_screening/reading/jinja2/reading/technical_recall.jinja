@@ -1,0 +1,85 @@
+{% extends "layout-app.jinja" %}
+{% from "nhsuk/components/button/macro.jinja" import button %}
+{% from "nhsuk/components/checkboxes/macro.jinja" import checkboxes %}
+
+{% macro recall_fields(prefix) %}
+<div class="nhsuk-form-group">
+  <label class="nhsuk-label" for="{{ prefix }}_reason">Reason for recall</label>
+  <select class="nhsuk-select" id="{{ prefix }}_reason" name="{{ prefix }}_reason">
+    <option value="" selected disabled>Select a reason</option>
+    <option value="breast_positioning">Breast positioning</option>
+    <option value="incorrect_exposure">Incorrect exposure</option>
+    <option value="image_obscured">Image obscured</option>
+    <option value="image_blurred">Image blurred</option>
+    <option value="image_missing">Image missing</option>
+    <option value="other_reason">Other reason</option>
+  </select>
+</div>
+<div class="nhsuk-form-group">
+  <label class="nhsuk-label nhsuk-label--s" for="{{ prefix }}_details">Additional details (optional)</label>
+  <input class="nhsuk-input" id="{{ prefix }}_details" name="{{ prefix }}_details" type="text">
+</div>
+{% endmacro %}
+
+{% block page_content %}
+<div class="nhsuk-grid-row">
+  <div class="nhsuk-grid-column-full">
+    <span class="nhsuk-caption-l">Erin Sauer</span>
+    <h1 class="nhsuk-heading-l">Technical recall</h1>
+
+    <form action="{{ request.path }}" method="post" novalidate>
+      {{ csrf_input }}
+
+      <h2 class="nhsuk-heading-m">Which views need to be retaken?</h2>
+
+      <div class="nhsuk-grid-row">
+        <div class="nhsuk-grid-column-one-half">
+          <h3 class="nhsuk-heading-s">Right breast</h3>
+
+          {% set rcc_conditional = recall_fields("rcc") %}
+          {{ checkboxes({
+            "idPrefix": "rcc",
+            "name": "rcc",
+            "items": [
+              {"value": "rcc", "text": "RCC", "conditional": {"html": rcc_conditional}}
+            ]
+          }) }}
+
+          {% set rmlo_conditional = recall_fields("rmlo") %}
+          {{ checkboxes({
+            "idPrefix": "rmlo",
+            "name": "rmlo",
+            "items": [
+              {"value": "rmlo", "text": "RMLO", "conditional": {"html": rmlo_conditional}}
+            ]
+          }) }}
+        </div>
+
+        <div class="nhsuk-grid-column-one-half">
+          <h3 class="nhsuk-heading-s">Left breast</h3>
+
+          {% set lcc_conditional = recall_fields("lcc") %}
+          {{ checkboxes({
+            "idPrefix": "lcc",
+            "name": "lcc",
+            "items": [
+              {"value": "lcc", "text": "LCC", "conditional": {"html": lcc_conditional}}
+            ]
+          }) }}
+
+          {% set lmlo_conditional = recall_fields("lmlo") %}
+          {{ checkboxes({
+            "idPrefix": "lmlo",
+            "name": "lmlo",
+            "items": [
+              {"value": "lmlo", "text": "LMLO", "conditional": {"html": lmlo_conditional}}
+            ]
+          }) }}
+        </div>
+      </div>
+
+      {{ button({"text": "Continue"}) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

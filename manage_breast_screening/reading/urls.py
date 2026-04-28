@@ -11,4 +11,9 @@ urlpatterns = [
         views.ReadImageView.as_view(),
         name="image_read",
     ),
+    path(
+        "sessions/<uuid:session_pk>/reads/<uuid:read_pk>/technical-recall/",
+        views.AddTechnicalRecallView.as_view(),
+        name="add_technical_recall",
+    ),
 ]
