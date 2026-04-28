@@ -82,4 +82,5 @@ module "container-apps" {
   container_memory                      = var.container_memory
   min_replicas                          = var.min_replicas
   relay_namespace_name                  = var.deploy_infra ? module.infra[0].relay_namespace_name : null
+  relay_namespace_id                    = var.deploy_infra ? module.infra[0].relay_namespace_id : null
 }

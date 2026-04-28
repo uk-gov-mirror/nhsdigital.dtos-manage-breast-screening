@@ -206,6 +206,12 @@ variable "relay_namespace_name" {
   default     = null
 }
 
+variable "relay_namespace_id" {
+  description = "The ID of the Azure Relay namespace. Used for RBAC scope."
+  type        = string
+  default     = null
+}
+
 locals {
   resource_group_name = "rg-${var.app_short_name}-${var.environment}-container-app-uks"
 

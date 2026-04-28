@@ -17,6 +17,7 @@ var roleID = {
   rbacAdmin: 'f58310d9-a9f6-439a-9e8d-f62e7b41a168'
   storageBlobDataContributor: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
   storageQueueDataContributor: '974c5e8b-45b9-4653-ba55-5f855dd0fb88'
+  azureRelaySender: '26baccc8-eea7-41f1-98f4-1762cc7f685d'
 }
 
 // Define role assignments for managed identity
@@ -36,7 +37,7 @@ var miRoleAssignments = [
     roleId: roleID.rbacAdmin
     description: 'Role Based Access Control Administrator access to subscription. Can assign Key Vault Secrets User, Storage Blob Data Contributor, and Storage Queue Data Contributor roles.'
     // Optional properties - only rbacAdmin has a condition
-    condition: '((!(ActionMatches{\'Microsoft.Authorization/roleAssignments/write\'})) OR (@Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {${roleID.kvSecretsOfficer}, ${roleID.storageBlobDataContributor}, ${roleID.storageQueueDataContributor}})) AND ((!(ActionMatches{\'Microsoft.Authorization/roleAssignments/delete\'})) OR (@Resource[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {${roleID.kvSecretsOfficer}, ${roleID.storageBlobDataContributor}, ${roleID.storageQueueDataContributor}}))'
+    condition: '((!(ActionMatches{\'Microsoft.Authorization/roleAssignments/write\'})) OR (@Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {${roleID.kvSecretsUser}, ${roleID.kvSecretsOfficer}, ${roleID.storageBlobDataContributor}, ${roleID.storageQueueDataContributor}, ${roleID.azureRelaySender}})) AND ((!(ActionMatches{\'Microsoft.Authorization/roleAssignments/delete\'})) OR (@Resource[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {${roleID.kvSecretsUser}, ${roleID.kvSecretsOfficer}, ${roleID.storageBlobDataContributor}, ${roleID.storageQueueDataContributor}, ${roleID.azureRelaySender}}))'
     conditionVersion: '2.0'
   }
 ]
@@ -58,7 +59,7 @@ var groupRoleAssignments = [
     roleId: roleID.rbacAdmin
     description: 'Role Based Access Control Administrator access to subscription. Can assign Key Vault Secrets Officer, Storage Blob Data Contributor, and Storage Queue Data Contributor roles.'
     // Optional properties - only rbacAdmin has a condition
-    condition: '((!(ActionMatches{\'Microsoft.Authorization/roleAssignments/write\'})) OR (@Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {${roleID.kvSecretsOfficer}, ${roleID.storageBlobDataContributor}, ${roleID.storageQueueDataContributor}})) AND ((!(ActionMatches{\'Microsoft.Authorization/roleAssignments/delete\'})) OR (@Resource[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {${roleID.kvSecretsOfficer}, ${roleID.storageBlobDataContributor}, ${roleID.storageQueueDataContributor}}))'
+    condition: '((!(ActionMatches{\'Microsoft.Authorization/roleAssignments/write\'})) OR (@Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {${roleID.kvSecretsUser}, ${roleID.kvSecretsOfficer}, ${roleID.storageBlobDataContributor}, ${roleID.storageQueueDataContributor}, ${roleID.azureRelaySender}})) AND ((!(ActionMatches{\'Microsoft.Authorization/roleAssignments/delete\'})) OR (@Resource[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {${roleID.kvSecretsUser}, ${roleID.kvSecretsOfficer}, ${roleID.storageBlobDataContributor}, ${roleID.storageQueueDataContributor}, ${roleID.azureRelaySender}}))'
     conditionVersion: '2.0'
   }
 ]
