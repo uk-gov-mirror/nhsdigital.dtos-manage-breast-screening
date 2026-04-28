@@ -9,7 +9,6 @@ from ninja.testing import TestClient
 from pydicom.uid import generate_uid
 
 from manage_breast_screening.core.api import api
-from manage_breast_screening.dicom.models import Study
 from manage_breast_screening.gateway.models import GatewayActionStatus
 from manage_breast_screening.gateway.tests.factories import GatewayActionFactory
 from manage_breast_screening.participants.models.appointment import (
@@ -157,7 +156,9 @@ def test_upload_missing_uids(dataset, mock_authentication, appointment_stub):
     )
 
 
-def test_upload_appointment_not_in_progress(dicom_file, mock_authentication, appointment_stub):
+def test_upload_appointment_not_in_progress(
+    dicom_file, mock_authentication, appointment_stub
+):
     appointment_stub.is_in_progress.return_value = False
 
     with patch(

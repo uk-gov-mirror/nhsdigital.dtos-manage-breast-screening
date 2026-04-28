@@ -1,5 +1,6 @@
 import logging
 import os
+from functools import cached_property
 
 import jwt
 from django.conf import settings
@@ -28,10 +29,10 @@ class Authentication(HttpBearer):
         Checks the signature, audience, and issuer claims to ensure the token is valid and intended for this API.
         """
         try:
-            signing_key = self.jwks_client.get_signing_key_from_jwt(token).key
+            signing_key = self.jwks_client.get_signing_key_from_jwt(token)
             payload = jwt.decode(
                 token,
-                signing_key,
+                signing_key.key,
                 algorithms=ALLOWED_ALGORITHMS,
                 audience=self.audience,
                 issuer=self.issuers,
@@ -48,7 +49,7 @@ class Authentication(HttpBearer):
         except Exception:
             logger.exception("Unable to parse authentication token.")
 
-    @property
+    @cached_property
     def jwks_client(self) -> jwt.PyJWKClient:
         """
         Creates a PyJWKClient instance for fetching and caching the JWKS keys from Azure AD.
@@ -62,7 +63,7 @@ class Authentication(HttpBearer):
             lifespan=JWT_SET_CACHE_TTL_SECONDS,
         )
 
-    @property
+    @cached_property
     def discovery_keys_url(self) -> str:
         return f"https://login.microsoftonline.com/{self.tenant_id}/discovery/v2.0/keys"
 
@@ -80,7 +81,7 @@ class Authentication(HttpBearer):
         """
         return os.getenv("TENANT_ID", "")
 
-    @property
+    @cached_property
     def issuers(self) -> list:
         """
         The expected issuer claim(s) in the JWT token. This should match the tenant ID and the Azure AD endpoints.
