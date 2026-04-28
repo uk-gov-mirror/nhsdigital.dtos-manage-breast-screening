@@ -3,10 +3,7 @@ from django.urls import reverse
 from playwright.sync_api import expect
 
 from manage_breast_screening.dicom.tests.factories import ImageFactory, SeriesFactory
-from manage_breast_screening.gateway.tests.factories import (
-    GatewayActionFactory,
-    RelayFactory,
-)
+from manage_breast_screening.gateway.tests.factories import RelayFactory
 from manage_breast_screening.participants.models.appointment import (
     AppointmentStatusNames,
     AppointmentWorkflowStepCompletion,
@@ -102,12 +99,8 @@ class TestGatewayImages(SystemTestCase):
         ).to_be_visible()
 
     def and_there_are_images_for_the_appointment(self):
-        series = SeriesFactory()
+        series = SeriesFactory(study__appointment=self.appointment)
         study = series.study
-        GatewayActionFactory.create(
-            appointment=self.appointment,
-            id=study.source_message_id,
-        )
         ImageFactory.create(series__study=study, laterality="R", view_position="MLO")
         ImageFactory.create(series=series, laterality="R", view_position="CC")
         ImageFactory.create(series=series, laterality="R", view_position="CC")

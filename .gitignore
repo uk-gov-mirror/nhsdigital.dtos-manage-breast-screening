@@ -16,7 +16,7 @@ __pycache__
 .venv/
 
 # Python coverage
-.coverage
+.coverage*
 
 # Django
 .env

@@ -6,7 +6,6 @@ from django.urls import reverse
 from pytest_django.asserts import assertInHTML, assertQuerySetEqual, assertRedirects
 
 import manage_breast_screening.dicom.tests.factories as dicom_factories
-from manage_breast_screening.gateway.tests.factories import GatewayActionFactory
 from manage_breast_screening.mammograms.forms.multiple_images_information_form import (
     MultipleImagesInformationForm,
 )
@@ -362,11 +361,10 @@ class TestAddMultipleImagesInformationView:
         def test_stale_form_when_dicom_series_is_updated(
             self, clinical_user_client, reviewed_appointment
         ):
-            series = dicom_factories.SeriesFactory()
-            study = series.study
-            GatewayActionFactory(
-                id=study.source_message_id, appointment=reviewed_appointment
+            series = dicom_factories.SeriesFactory(
+                study__appointment=reviewed_appointment
             )
+            study = series.study
             dicom_factories.ImageFactory.create_batch(
                 2, series=series, laterality="L", view_position="CC"
             )

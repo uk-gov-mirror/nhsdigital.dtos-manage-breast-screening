@@ -3,7 +3,6 @@ from urllib.parse import urlencode
 import pytest
 from django.http import QueryDict
 
-from manage_breast_screening.dicom.models import Study
 from manage_breast_screening.dicom.study_service import StudyService
 from manage_breast_screening.dicom.tests.factories import ImageFactory, StudyFactory
 from manage_breast_screening.gateway.tests.factories import GatewayActionFactory
@@ -73,8 +72,12 @@ class TestGatewayImageDetailsForm:
         }
 
     def test_counts_provided_for_all_image_types(self, study_service, recall_service):
-        gateway_action = GatewayActionFactory(appointment=study_service.appointment)
-        StudyFactory(source_message_id=gateway_action.id)
+        gateway_action = GatewayActionFactory.build(
+            appointment=study_service.appointment
+        )
+        StudyFactory(
+            source_message_id=gateway_action.id, appointment=study_service.appointment
+        )
 
         form = GatewayImageDetailsForm(
             QueryDict(
@@ -100,7 +103,7 @@ class TestGatewayImageDetailsForm:
 
         study = form.save(study_service=study_service, recall_service=recall_service)
 
-        assert Study.for_appointment(study_service.appointment) == study
+        assert study_service.appointment.dicom_study == study
         assert study.additional_details == "Some additional details"
         assert study.completeness == StudyCompleteness.COMPLETE
         assert not study.imperfect_but_best_possible
@@ -110,8 +113,8 @@ class TestGatewayImageDetailsForm:
         self, study_service, recall_service
     ):
         appointment = study_service.appointment
-        gateway_action = GatewayActionFactory(appointment=appointment)
-        StudyFactory(source_message_id=gateway_action.id)
+        gateway_action = GatewayActionFactory.build(appointment=appointment)
+        StudyFactory(appointment=appointment, source_message_id=gateway_action.id)
         form = GatewayImageDetailsForm(
             QueryDict(
                 urlencode(
@@ -156,8 +159,12 @@ class TestGatewayImageDetailsForm:
     def test_counts_provided_for_only_one_image_type_and_should_not_recall(
         self, study_service, recall_service
     ):
-        gateway_action = GatewayActionFactory(appointment=study_service.appointment)
-        StudyFactory(source_message_id=gateway_action.id)
+        gateway_action = GatewayActionFactory.build(
+            appointment=study_service.appointment
+        )
+        StudyFactory(
+            appointment=study_service.appointment, source_message_id=gateway_action.id
+        )
 
         form = GatewayImageDetailsForm(
             QueryDict(
@@ -260,8 +267,9 @@ class TestGatewayImageDetailsForm:
         }
 
     def test_initial(self, in_progress_appointment):
-        gateway_action = GatewayActionFactory(appointment=in_progress_appointment)
+        gateway_action = GatewayActionFactory.build(appointment=in_progress_appointment)
         study = StudyFactory(
+            appointment=in_progress_appointment,
             source_message_id=gateway_action.id,
             additional_details="important note",
             completeness=StudyCompleteness.INCOMPLETE,

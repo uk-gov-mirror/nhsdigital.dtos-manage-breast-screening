@@ -77,8 +77,10 @@ class TestImages:
     def test_renders_gateway_images_view_counts(
         self, _, clinical_user_client, completed_appointment
     ):
-        action = GatewayActionFactory(appointment=completed_appointment)
-        study = DicomStudyFactory(source_message_id=action.id)
+        action = GatewayActionFactory.build(appointment=completed_appointment)
+        study = DicomStudyFactory(
+            source_message_id=action.id, appointment=completed_appointment
+        )
         DicomImageFactory(series__study=study, view_position="MLO", laterality="R")
         DicomImageFactory(series__study=study, view_position="CC", laterality="R")
         DicomImageFactory(series__study=study, view_position="MLO", laterality="L")

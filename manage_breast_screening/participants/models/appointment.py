@@ -143,6 +143,9 @@ class Appointment(BaseModel):
     def active(self):
         return self.current_status.active
 
+    def is_in_progress(self):
+        return self.current_status.is_in_progress()
+
     def set_status(self, status_name, created_by):
         current_status = self.current_status
 

@@ -5,7 +5,6 @@ from urllib.parse import urlencode
 from django.urls import reverse
 
 from manage_breast_screening.auth.models import Permission
-from manage_breast_screening.dicom.models import Study as DicomStudy
 from manage_breast_screening.dicom.study_service import (
     StudyService as DicomStudyService,
 )
@@ -359,7 +358,7 @@ class ImagesPresenter:
 
 class GatewayImagesPresenter(ImagesPresenter):
     def __init__(self, appointment):
-        study = DicomStudy.for_appointment(appointment)
+        study = appointment.dicom_study
         self.additional_details = study.additional_details
 
         images = study.images()

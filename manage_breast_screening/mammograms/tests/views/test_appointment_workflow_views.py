@@ -19,12 +19,8 @@ from pytest_django.asserts import (
 
 import manage_breast_screening.dicom.tests.factories as dicom_factories
 from manage_breast_screening.core.models import AuditLog
-from manage_breast_screening.dicom.models import Study as DicomStudy
 from manage_breast_screening.gateway.models import GatewayAction, GatewayActionType
-from manage_breast_screening.gateway.tests.factories import (
-    GatewayActionFactory,
-    RelayFactory,
-)
+from manage_breast_screening.gateway.tests.factories import RelayFactory
 from manage_breast_screening.mammograms.forms.images.record_images_taken_form import (
     RecordImagesTakenForm,
 )
@@ -611,11 +607,7 @@ class TestUpsertGatewayImagesView:
     def test_marks_the_step_complete_and_redirects_to_check_info(
         self, _, clinical_user_client, reviewed_appointment
     ):
-        dicom_study = dicom_factories.StudyFactory()
-        GatewayActionFactory.create(
-            id=str(dicom_study.source_message_id),
-            appointment=reviewed_appointment,
-        )
+        dicom_factories.StudyFactory(appointment=reviewed_appointment)
         response = clinical_user_client.http.post(
             reverse(
                 "mammograms:upsert_gateway_images",
@@ -659,14 +651,9 @@ class TestUpsertGatewayImagesView:
     def test_repeat_images_redirects_to_multiple_images_page(
         self, _, clinical_user_client, reviewed_appointment
     ):
-        series = dicom_factories.SeriesFactory()
-        study = series.study
+        series = dicom_factories.SeriesFactory(study__appointment=reviewed_appointment)
         dicom_factories.ImageFactory.create_batch(
             2, laterality="R", view_position="CC", series=series
-        )
-        GatewayActionFactory.create(
-            id=str(study.source_message_id),
-            appointment=reviewed_appointment,
         )
         response = clinical_user_client.http.post(
             reverse(
@@ -693,11 +680,7 @@ class TestUpsertGatewayImagesView:
         )
 
     def test_updates_the_study(self, clinical_user_client, reviewed_appointment):
-        dicom_study = dicom_factories.StudyFactory()
-        GatewayActionFactory.create(
-            id=str(dicom_study.source_message_id),
-            appointment=reviewed_appointment,
-        )
+        dicom_factories.StudyFactory(appointment=reviewed_appointment)
         clinical_user_client.http.post(
             reverse(
                 "mammograms:upsert_gateway_images",
@@ -716,7 +699,9 @@ class TestUpsertGatewayImagesView:
             },
         )
 
-        study = DicomStudy.for_appointment(reviewed_appointment)
+        study = reviewed_appointment.dicom_study
+        study.refresh_from_db()
+
         assert study.additional_details == "Some details about the images"
         assert study.imperfect_but_best_possible is False
         assert not study.reasons_incomplete
