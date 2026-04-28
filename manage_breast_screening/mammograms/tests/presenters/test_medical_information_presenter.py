@@ -51,6 +51,23 @@ class TestRecordMedicalInformationPresenter:
             area=SymptomAreas.BOTH_BREASTS,
         )
 
+        symptom3 = SymptomFactory.create(
+            other=True,
+            appointment=appointment,
+            when_started=RelativeDateChoices.LESS_THAN_THREE_MONTHS,
+            area=SymptomAreas.RIGHT_BREAST,
+            symptom_sub_type_details="abc",
+        )
+
+        symptom4 = SymptomFactory.create(
+            other=True,
+            appointment=appointment,
+            when_started=RelativeDateChoices.LESS_THAN_THREE_MONTHS,
+            area=SymptomAreas.LEFT_BREAST,
+            highlight_to_readers=False,
+            symptom_sub_type_details="xyz",
+        )
+
         presenter = MedicalInformationPresenter(appointment)
 
         assert presenter.symptom_rows == [
@@ -66,10 +83,44 @@ class TestRecordMedicalInformationPresenter:
                     ],
                 },
                 "key": {
-                    "text": "Lump",
+                    "html": 'Lump<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>',
                 },
                 "value": {
                     "html": "Left breast<br>Not sure<br>Symptom is intermittent<br>Stopped: resolved date<br>Not investigated<br>Additional information: abc",
+                },
+            },
+            {
+                "actions": {
+                    "items": [
+                        {
+                            "text": "Change",
+                            "classes": "nhsuk-link--no-visited-state",
+                            "visuallyHiddenText": "other",
+                            "href": f"/mammograms/{appointment.id}/record-medical-information/other/{symptom3.id}/",
+                        },
+                    ],
+                },
+                "key": {
+                    "html": 'Other<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>'
+                },
+                "value": {
+                    "html": "Description: abc<br>Right breast<br>Less than 3 months ago<br>Not investigated"
+                },
+            },
+            {
+                "actions": {
+                    "items": [
+                        {
+                            "text": "Change",
+                            "classes": "nhsuk-link--no-visited-state",
+                            "visuallyHiddenText": "other",
+                            "href": f"/mammograms/{appointment.id}/record-medical-information/other/{symptom4.id}/",
+                        }
+                    ]
+                },
+                "key": {"text": "Other"},
+                "value": {
+                    "html": "Description: xyz<br>Left breast<br>Less than 3 months ago<br>Not investigated"
                 },
             },
             {
@@ -84,7 +135,7 @@ class TestRecordMedicalInformationPresenter:
                     ],
                 },
                 "key": {
-                    "text": "Swelling or shape change",
+                    "html": 'Swelling or shape change<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>',
                 },
                 "value": {
                     "html": "Both breasts<br>Less than 3 months ago<br>Not investigated",

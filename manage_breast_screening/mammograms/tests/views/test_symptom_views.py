@@ -5,6 +5,7 @@ from pytest_django.asserts import assertInHTML, assertMessages, assertRedirects
 
 from manage_breast_screening.nhsuk_forms.choices import YesNo
 from manage_breast_screening.participants.models.symptom import (
+    HighlightToReaderChoices,
     NippleChangeChoices,
     RelativeDateChoices,
     SkinChangeChoices,
@@ -34,6 +35,10 @@ class TestAddLumpView:
             )
         )
         assert response.status_code == 200
+        assert (
+            "Lumps are a recognised symptom of breast cancer. Information recorded here will be highlighted during image reading."
+            in response.content.decode()
+        )
 
     def test_valid_post_redirects_to_appointment(
         self, clinical_user_client, confirmed_identity_appointment
@@ -112,6 +117,10 @@ class TestUpdateLumpView:
             )
         )
         assert response.status_code == 200
+        assert (
+            "Lumps are a recognised symptom of breast cancer. Information recorded here will be highlighted during image reading."
+            in response.content.decode()
+        )
 
     def test_non_existant_or_deleted_symptom_id_is_a_404(
         self, clinical_user_client, confirmed_identity_appointment
@@ -232,6 +241,10 @@ class TestAddSkinChangeView:
             )
         )
         assert response.status_code == 200
+        assert (
+            "Skin change is a recognised symptom of breast cancer. Information recorded here will be highlighted during image reading."
+            in response.content.decode()
+        )
 
     def test_valid_post_redirects_to_appointment(
         self, clinical_user_client, confirmed_identity_appointment
@@ -277,6 +290,10 @@ class TestUpdateSkinChangeView:
             )
         )
         assert response.status_code == 200
+        assert (
+            "Skin change is a recognised symptom of breast cancer. Information recorded here will be highlighted during image reading."
+            in response.content.decode()
+        )
 
     def test_valid_post_redirects_to_appointment(
         self, clinical_user_client, colour_change
@@ -318,6 +335,10 @@ class TestAddNippleChangeView:
             )
         )
         assert response.status_code == 200
+        assert (
+            "Nipple change is a recognised symptom of breast cancer. Information recorded here will be highlighted during image reading."
+            in response.content.decode()
+        )
 
     def test_valid_post_redirects_to_appointment(
         self, clinical_user_client, confirmed_identity_appointment
@@ -359,6 +380,10 @@ class TestUpdateNippleChangeView:
             )
         )
         assert response.status_code == 200
+        assert (
+            "Nipple change is a recognised symptom of breast cancer. Information recorded here will be highlighted during image reading."
+            in response.content.decode()
+        )
 
     def test_valid_post_redirects_to_appointment(self, clinical_user_client, inversion):
         response = clinical_user_client.http.post(
@@ -395,6 +420,13 @@ class TestAddOtherSymptomView:
         )
         assert response.status_code == 200
 
+        content = response.content.decode()
+        assert (
+            "Information recorded here will be highlighted during image reading."
+            not in content
+        )
+        assert "Highlight this symptom to readers?" in content
+
     def test_valid_post_redirects_to_appointment(
         self, clinical_user_client, confirmed_identity_appointment
     ):
@@ -409,6 +441,7 @@ class TestAddOtherSymptomView:
                 "symptom_sub_type_details": "abc",
                 "when_started": RelativeDateChoices.LESS_THAN_THREE_MONTHS.value,
                 "investigated": YesNo.NO.value,
+                "highlight_to_readers": HighlightToReaderChoices.YES.value,
             },
         )
         assertRedirects(
@@ -440,6 +473,13 @@ class TestUpdateOtherSymptomView:
         )
         assert response.status_code == 200
 
+        content = response.content.decode()
+        assert (
+            "Information recorded here will be highlighted during image reading."
+            not in content
+        )
+        assert "Highlight this symptom to readers?" in content
+
     def test_valid_post_redirects_to_appointment(
         self, clinical_user_client, other_symptom
     ):
@@ -457,6 +497,7 @@ class TestUpdateOtherSymptomView:
                 "symptom_sub_type_details": "abc",
                 "when_started": RelativeDateChoices.LESS_THAN_THREE_MONTHS.value,
                 "investigated": YesNo.NO.value,
+                "highlight_to_readers": HighlightToReaderChoices.YES.value,
             },
         )
         assertRedirects(
@@ -481,6 +522,13 @@ class TestAddBreastPainView:
         )
         assert response.status_code == 200
 
+        content = response.content.decode()
+        assert (
+            "Information recorded here will be highlighted during image reading."
+            not in content
+        )
+        assert "Highlight this symptom to readers?" in content
+
     def test_valid_post_redirects_to_appointment(
         self, clinical_user_client, confirmed_identity_appointment
     ):
@@ -494,6 +542,7 @@ class TestAddBreastPainView:
                 "area_description_right_breast": "uiq",
                 "when_started": RelativeDateChoices.LESS_THAN_THREE_MONTHS.value,
                 "investigated": YesNo.NO.value,
+                "highlight_to_readers": HighlightToReaderChoices.YES.value,
             },
         )
         assertRedirects(
@@ -526,6 +575,13 @@ class TestUpdateBreastPainView:
         )
         assert response.status_code == 200
 
+        content = response.content.decode()
+        assert (
+            "Information recorded here will be highlighted during image reading."
+            not in content
+        )
+        assert "Highlight this symptom to readers?" in content
+
     def test_valid_post_redirects_to_appointment(
         self, clinical_user_client, breast_pain
     ):
@@ -542,6 +598,7 @@ class TestUpdateBreastPainView:
                 "area_description_right_breast": "uiq",
                 "when_started": RelativeDateChoices.LESS_THAN_THREE_MONTHS.value,
                 "investigated": YesNo.NO.value,
+                "highlight_to_readers": HighlightToReaderChoices.YES.value,
             },
         )
         assertRedirects(

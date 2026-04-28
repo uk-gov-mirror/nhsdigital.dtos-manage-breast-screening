@@ -173,7 +173,7 @@ class TestRecordingSymptoms(SystemTestCase):
 
     def and_the_lump_on_the_right_breast_is_listed(self):
         key = self.page.locator(
-            ".nhsuk-summary-list__key", has=self.page.get_by_text("Lump", exact=True)
+            ".nhsuk-summary-list__key", has=self.page.get_by_text("Lump")
         )
         row = self.page.locator(".nhsuk-summary-list__row").filter(has=key)
         expect(row).to_contain_text("Right breast")
@@ -181,7 +181,7 @@ class TestRecordingSymptoms(SystemTestCase):
     def when_i_click_on_change(self):
         key = self.page.locator(
             ".nhsuk-summary-list__key",
-            has=self.page.get_by_text("Swelling or shape change", exact=True),
+            has=self.page.get_by_text("Swelling or shape change"),
         )
         row = self.page.locator(".nhsuk-summary-list__row").filter(has=key)
         row.locator(".nhsuk-summary-list__actions").get_by_text(
@@ -194,7 +194,7 @@ class TestRecordingSymptoms(SystemTestCase):
     def and_i_see_three_months_to_a_year(self):
         key = self.page.locator(
             ".nhsuk-summary-list__key",
-            has=self.page.get_by_text("Swelling or shape change", exact=True),
+            has=self.page.get_by_text("Swelling or shape change"),
         )
         row = self.page.locator(".nhsuk-summary-list__row").filter(has=key)
         expect(row).to_contain_text("3 months to a year")
@@ -207,7 +207,7 @@ class TestRecordingSymptoms(SystemTestCase):
 
     def and_the_lump_is_no_longer_listed(self):
         locator = self.page.locator(
-            ".nhsuk-summary-list__key", has=self.page.get_by_text("Lump", exact=True)
+            ".nhsuk-summary-list__key", has=self.page.get_by_text("Lump")
         )
         expect(locator).not_to_be_attached()
 

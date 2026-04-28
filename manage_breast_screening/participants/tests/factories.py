@@ -292,6 +292,7 @@ class SymptomFactory(DjangoModelFactory):
     intermittent = False
     investigated = False
     recently_resolved = False
+    highlight_to_readers = True
     appointment = SubFactory(AppointmentFactory)
     area_description = LazyAttribute(
         lambda o: "" if o.area == models.SymptomAreas.BOTH_BREASTS else "abc"
@@ -328,6 +329,8 @@ class SymptomFactory(DjangoModelFactory):
         other = Trait(
             symptom_type_id=models.SymptomType.OTHER, symptom_sub_type_details="abc"
         )
+
+        breast_pain = Trait(symptom_type_id=models.SymptomType.BREAST_PAIN)
 
 
 class HormoneReplacementTherapyFactory(DjangoModelFactory):

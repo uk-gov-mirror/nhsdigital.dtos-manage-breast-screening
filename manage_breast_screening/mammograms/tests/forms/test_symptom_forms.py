@@ -19,6 +19,7 @@ from manage_breast_screening.mammograms.forms.symptom_forms import (
 )
 from manage_breast_screening.nhsuk_forms.choices import YesNo
 from manage_breast_screening.participants.models.symptom import (
+    HighlightToReaderChoices,
     NippleChangeChoices,
     SkinChangeChoices,
     SymptomAreas,
@@ -588,6 +589,7 @@ class TestOtherSymptomForm:
                         "symptom_sub_type": SkinChangeChoices.COLOUR_CHANGE,
                         "when_started": RelativeDateChoices.LESS_THAN_THREE_MONTHS,
                         "investigated": YesNo.NO,
+                        "highlight_to_readers": HighlightToReaderChoices.YES,
                     }
                 )
             )
@@ -603,6 +605,9 @@ class TestOtherSymptomForm:
             "symptom_sub_type_details": ["Enter a description of the symptom"],
             "investigated": ["Select whether the symptom has been investigated or not"],
             "area": ["Select the location of the symptom"],
+            "highlight_to_readers": [
+                "Select whether this symptom should be highlighted to image readers"
+            ],
         }
 
     def test_missing_conditionally_required_fields(self):
@@ -614,6 +619,7 @@ class TestOtherSymptomForm:
                         "symptom_sub_type_details": "abc symptom",
                         "when_started": RelativeDateChoices.SINCE_A_SPECIFIC_DATE,
                         "investigated": YesNo.YES,
+                        "highlight_to_readers": HighlightToReaderChoices.YES,
                     }
                 )
             )
@@ -641,6 +647,7 @@ class TestOtherSymptomForm:
                         "specific_date_0": "2",
                         "specific_date_1": "2025",
                         "investigation_details": "def",
+                        "highlight_to_readers": HighlightToReaderChoices.YES,
                     }
                 )
             )
@@ -658,6 +665,7 @@ class TestBreastPainForm:
                         "area_description_left_breast": "uoq",
                         "when_started": RelativeDateChoices.LESS_THAN_THREE_MONTHS,
                         "investigated": YesNo.NO,
+                        "highlight_to_readers": HighlightToReaderChoices.YES,
                     }
                 )
             )
@@ -672,6 +680,9 @@ class TestBreastPainForm:
             "when_started": ["Select how long the symptom has existed"],
             "investigated": ["Select whether the symptom has been investigated or not"],
             "area": ["Select the location of the pain"],
+            "highlight_to_readers": [
+                "Select whether this symptom should be highlighted to image readers"
+            ],
         }
 
     def test_missing_conditionally_required_fields(self):
@@ -683,6 +694,7 @@ class TestBreastPainForm:
                         "when_started": RelativeDateChoices.SINCE_A_SPECIFIC_DATE,
                         "investigated": YesNo.YES,
                         "recently_resolved": True,
+                        "highlight_to_readers": HighlightToReaderChoices.YES,
                     }
                 )
             )
@@ -712,6 +724,7 @@ class TestBreastPainForm:
                         "investigation_details": "def",
                         "recently_resolved": True,
                         "when_resolved": "3 months ago",
+                        "highlight_to_readers": HighlightToReaderChoices.YES,
                     }
                 )
             )

@@ -19,6 +19,7 @@ from manage_breast_screening.nhsuk_forms.fields.choice_fields import (
 from manage_breast_screening.nhsuk_forms.forms import FormWithConditionalFields
 from manage_breast_screening.nhsuk_forms.utils import YesNo, yes_no, yes_no_field
 from manage_breast_screening.participants.models.symptom import (
+    HighlightToReaderChoices,
     NippleChangeChoices,
     RelativeDateChoices,
     SkinChangeChoices,
@@ -79,6 +80,13 @@ class CommonFields:
         hint="Include where, when and the outcome",
         widget=Textarea(attrs={"rows": 5}),
         error_messages={"required": "Enter details of any investigations"},
+    )
+    highlight_to_readers = ChoiceField(
+        choices=HighlightToReaderChoices,
+        label="Highlight this symptom to readers?",
+        error_messages={
+            "required": "Select whether this symptom should be highlighted to image readers"
+        },
     )
     additional_information = CharField(
         required=False,
@@ -151,6 +159,9 @@ class SymptomForm(FormWithConditionalFields):
             "when_resolved": instance.when_resolved,
             "investigated": yes_no(instance.investigated),
             "investigation_details": instance.investigation_details,
+            "highlight_to_readers": HighlightToReaderChoices.YES
+            if instance.highlight_to_readers
+            else HighlightToReaderChoices.NO,
             "additional_information": instance.additional_information,
         }
 
@@ -184,6 +195,10 @@ class SymptomForm(FormWithConditionalFields):
         intermittent = self.cleaned_data.get("intermittent", False)
         recently_resolved = self.cleaned_data.get("recently_resolved", False)
         when_resolved = self.cleaned_data.get("when_resolved", "")
+        highlight_to_readers = (
+            self.cleaned_data.get("highlight_to_readers", HighlightToReaderChoices.YES)
+            == HighlightToReaderChoices.YES
+        )
         additional_information = self.cleaned_data.get("additional_information", "")
 
         return dict(
@@ -199,6 +214,7 @@ class SymptomForm(FormWithConditionalFields):
             intermittent=intermittent,
             recently_resolved=recently_resolved,
             when_resolved=when_resolved,
+            highlight_to_readers=highlight_to_readers,
             additional_information=additional_information,
         )
 
@@ -470,6 +486,7 @@ class OtherSymptomForm(SymptomForm):
     when_resolved = CommonFields.when_resolved
     investigated = CommonFields.investigated
     investigation_details = CommonFields.investigation_details
+    highlight_to_readers = CommonFields.highlight_to_readers
     additional_information = CommonFields.additional_information
 
     def __init__(self, instance=None, **kwargs):
@@ -514,6 +531,7 @@ class BreastPainForm(SymptomForm):
     when_resolved = CommonFields.when_resolved
     investigated = CommonFields.investigated
     investigation_details = CommonFields.investigation_details
+    highlight_to_readers = CommonFields.highlight_to_readers
     additional_information = CommonFields.additional_information
 
     def __init__(self, instance=None, **kwargs):

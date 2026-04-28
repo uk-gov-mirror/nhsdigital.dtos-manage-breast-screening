@@ -58,6 +58,11 @@ class RelativeDateChoices(models.TextChoices):
     NOT_SURE = "NOT_SURE", "Not sure"
 
 
+class HighlightToReaderChoices(models.TextChoices):
+    YES = "YES", "Yes, highlight to image readers"
+    NO = "NO", "No, just record information"
+
+
 class Symptom(BaseModel):
     symptom_type = models.ForeignKey(SymptomType, on_delete=models.PROTECT)
     symptom_sub_type = models.ForeignKey(
@@ -88,6 +93,8 @@ class Symptom(BaseModel):
     intermittent = models.BooleanField(null=False, default=False)
     recently_resolved = models.BooleanField(null=False, default=False)
     when_resolved = models.CharField(blank=True, null=False)
+
+    highlight_to_readers = models.BooleanField(null=False, default=True)
 
     additional_information = models.CharField(blank=True, null=False)
 

@@ -48,7 +48,7 @@ class BaseSymptomFormView(InProgressAppointmentMixin, FormView):
         }
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data()
+        context = super().get_context_data(**kwargs)
 
         participant = self.appointment.participant
 
@@ -58,10 +58,17 @@ class BaseSymptomFormView(InProgressAppointmentMixin, FormView):
                 "caption": participant.full_name,
                 "heading": f"Details of the {self.symptom_type_name.lower()}",
                 "page_title": f"Details of the {self.symptom_type_name.lower()}",
+                "heading_description": self._get_heading_description(),
             },
         )
 
         return context
+
+    def _get_heading_description(self):
+        suffix = " a recognised symptom of breast cancer. Information recorded here will be highlighted during image reading."
+        if self.symptom_type_name == "lump":
+            return "Lumps are" + suffix
+        return f"{self.symptom_type_name.capitalize()} is" + suffix
 
 
 class AddSymptomView(BaseSymptomFormView):
@@ -137,13 +144,6 @@ class AddSymptomLumpView(AddSymptomView):
     form_class = LumpForm
     template_name = "mammograms/medical_information/symptoms/forms/simple_symptom.jinja"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["heading_description"] = (
-            "Lumps are a recognised symptom of breast cancer. Information recorded here will be highlighted during image reading."
-        )
-        return context
-
 
 class AddSymptomSwellingOrShapeChangeView(AddSymptomView):
     """
@@ -211,13 +211,6 @@ class UpdateSymptomLumpView(UpdateSymptomView):
 
     def extra_filters(self):
         return {"symptom_type_id": SymptomType.LUMP}
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["heading_description"] = (
-            "Record whether the lump is in the left breast, right breast or both."
-        )
-        return context
 
 
 class UpdateSymptomSwellingOrShapeChangeView(UpdateSymptomView):
