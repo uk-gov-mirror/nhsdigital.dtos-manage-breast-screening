@@ -41,6 +41,7 @@ def environment(**options):
             "raise": raise_helper,
             "static": static,
             "url": reverse,
+            "DJANGO_ENV": settings.DJANGO_ENV,
         }
     )
 

@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime, timedelta
-from os import getenv
 
 import yaml
 from django.conf import settings
@@ -79,7 +78,7 @@ class Command(BaseCommand):
         return open(MAMMOGRAM_DIAGRAMS_DIR / file_name, "rb")
 
     def handle(self, *args, **kwargs):
-        if getenv("DJANGO_ENV", "production") == "production":
+        if settings.IS_PRODUCTION:
             raise Exception("This command cannot be run in production")
 
         if not kwargs["noinput"]:
