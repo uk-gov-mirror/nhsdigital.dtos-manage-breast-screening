@@ -64,6 +64,10 @@ variable "environment" {
   type        = string
 }
 
+variable "env_vars_from_yaml" {
+  type = map(any)
+}
+
 variable "fetch_secrets_from_app_key_vault" {
   description = <<EOT
     Set to false initially to create and populate the app key vault.
@@ -215,12 +219,9 @@ locals {
   database_name = "manage_breast_screening"
   # Here we expect the environment to be in format pr-XXX. For example PR 1234 would have environment pr-1234 and port 2234
   database_port = var.deploy_database_as_container ? try(tonumber(regex("\\d+", var.environment)), 24) + 1000 : 5432
-  env_vars_from_yaml = yamldecode(
-    file("${path.module}/../../environments/${var.env_config}/variables.yml")
-  )
-  external_url = "https://${module.frontdoor_endpoint.custom_domains["${var.environment}-domain"].host_name}/"
+  external_url  = "https://${module.frontdoor_endpoint.custom_domains["${var.environment}-domain"].host_name}/"
   common_env = merge(
-    local.env_vars_from_yaml,
+    var.env_vars_from_yaml,
     {
       SSL_MODE                                   = "require"
       DJANGO_ENV                                 = var.env_config

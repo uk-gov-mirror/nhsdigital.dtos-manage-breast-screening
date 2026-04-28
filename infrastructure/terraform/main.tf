@@ -14,6 +14,7 @@ module "infra" {
   infra_key_vault_rg                        = local.infra_key_vault_rg
   app_short_name                            = var.app_short_name
   environment                               = var.env_config
+  env_vars_from_yaml                        = local.env_vars_from_yaml
   hub                                       = var.hub
   protect_keyvault                          = var.protect_keyvault
   vnet_address_space                        = var.vnet_address_space
@@ -60,6 +61,7 @@ module "container-apps" {
   enable_entra_id_authentication        = var.enable_entra_id_authentication
   environment                           = var.environment
   env_config                            = var.env_config
+  env_vars_from_yaml                    = local.env_vars_from_yaml
   fetch_secrets_from_app_key_vault      = var.fetch_secrets_from_app_key_vault
   deploy_infra                          = var.deploy_infra
   front_door_profile                    = var.front_door_profile
