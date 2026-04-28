@@ -1,10 +1,9 @@
 from logging import getLogger
 
 from django.contrib.auth.decorators import permission_required
-from django.forms import Form
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
-from django.views.generic import FormView, TemplateView
+from django.views.generic import TemplateView
 from rules.contrib.views import PermissionRequiredMixin
 
 from manage_breast_screening.auth.models import Permission
@@ -22,8 +21,7 @@ def show_reading_dashboard_view(request):
     return render(request, "show_readings.jinja")
 
 
-class ShowImageReadView(PermissionRequiredMixin, FormView):
-    form_class = Form
+class ShowImageReadView(PermissionRequiredMixin, TemplateView):
     template_name = "read_image.jinja"
     permission_required = Permission.READ_IMAGES
 
