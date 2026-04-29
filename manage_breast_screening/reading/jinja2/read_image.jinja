@@ -5,7 +5,6 @@
 {% from "nhsuk/components/tag/macro.jinja" import tag %}
 {% from "nhsuk/components/warning-callout/macro.jinja" import warningCallout %}
 {% from "mammograms/check_information/medical_information_card.jinja" import medical_summary_card %}
-{% from "mammograms/medical_information/section_cards.jinja" import symptoms_content %}
 
 {# djlint:off H006 #}
 
@@ -61,7 +60,9 @@
     {% if medical_information_presenter.significant_symptom_rows %}
       {{ warningCallout({
         "heading": "Significant symptoms reported",
-        "html": symptoms_content(medical_information_presenter, significant_only=True, read_only=True),
+        "html": summaryList({
+          "rows": medical_information_presenter.significant_symptom_rows
+        }),
       }) }}
     {% endif %}
 
