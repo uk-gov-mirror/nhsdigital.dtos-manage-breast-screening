@@ -31,9 +31,7 @@ from manage_breast_screening.participants.tests.factories import (
 
 @pytest.mark.django_db
 class TestRecordMedicalInformationPresenter:
-    def test_formats_symptoms_summary_list(self):
-        appointment = AppointmentFactory.create()
-
+    def _create_default_symptoms(self, appointment):
         symptom1 = SymptomFactory.create(
             lump=True,
             appointment=appointment,
@@ -43,14 +41,12 @@ class TestRecordMedicalInformationPresenter:
             when_resolved="resolved date",
             additional_information="abc",
         )
-
         symptom2 = SymptomFactory.create(
             swelling_or_shape_change=True,
             appointment=appointment,
             when_started=RelativeDateChoices.LESS_THAN_THREE_MONTHS,
             area=SymptomAreas.BOTH_BREASTS,
         )
-
         symptom3 = SymptomFactory.create(
             other=True,
             appointment=appointment,
@@ -58,7 +54,6 @@ class TestRecordMedicalInformationPresenter:
             area=SymptomAreas.RIGHT_BREAST,
             symptom_sub_type_details="abc",
         )
-
         symptom4 = SymptomFactory.create(
             other=True,
             appointment=appointment,
@@ -66,6 +61,13 @@ class TestRecordMedicalInformationPresenter:
             area=SymptomAreas.LEFT_BREAST,
             highlight_to_readers=False,
             symptom_sub_type_details="xyz",
+        )
+        return symptom1, symptom2, symptom3, symptom4
+
+    def test_symptom_rows(self):
+        appointment = AppointmentFactory.create()
+        symptom1, symptom2, symptom3, symptom4 = self._create_default_symptoms(
+            appointment
         )
 
         presenter = MedicalInformationPresenter(appointment)
@@ -134,6 +136,78 @@ class TestRecordMedicalInformationPresenter:
                         },
                     ],
                 },
+                "key": {
+                    "html": 'Swelling or shape change<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>',
+                },
+                "value": {
+                    "html": "Both breasts<br>Less than 3 months ago<br>Not investigated",
+                },
+            },
+        ]
+
+    def test_read_only_symptom_rows(self):
+        appointment = AppointmentFactory.create()
+        self._create_default_symptoms(appointment)
+
+        presenter = MedicalInformationPresenter(appointment)
+
+        assert presenter.read_only_symptom_rows == [
+            {
+                "key": {
+                    "html": 'Lump<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>',
+                },
+                "value": {
+                    "html": "Left breast<br>Not sure<br>Symptom is intermittent<br>Stopped: resolved date<br>Not investigated<br>Additional information: abc",
+                },
+            },
+            {
+                "key": {
+                    "html": 'Other<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>'
+                },
+                "value": {
+                    "html": "Description: abc<br>Right breast<br>Less than 3 months ago<br>Not investigated"
+                },
+            },
+            {
+                "key": {"text": "Other"},
+                "value": {
+                    "html": "Description: xyz<br>Left breast<br>Less than 3 months ago<br>Not investigated"
+                },
+            },
+            {
+                "key": {
+                    "html": 'Swelling or shape change<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>',
+                },
+                "value": {
+                    "html": "Both breasts<br>Less than 3 months ago<br>Not investigated",
+                },
+            },
+        ]
+
+    def test_significant_symptom_rows(self):
+        appointment = AppointmentFactory.create()
+        self._create_default_symptoms(appointment)
+
+        presenter = MedicalInformationPresenter(appointment)
+
+        assert presenter.significant_symptom_rows == [
+            {
+                "key": {
+                    "html": 'Lump<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>',
+                },
+                "value": {
+                    "html": "Left breast<br>Not sure<br>Symptom is intermittent<br>Stopped: resolved date<br>Not investigated<br>Additional information: abc",
+                },
+            },
+            {
+                "key": {
+                    "html": 'Other<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>'
+                },
+                "value": {
+                    "html": "Description: abc<br>Right breast<br>Less than 3 months ago<br>Not investigated"
+                },
+            },
+            {
                 "key": {
                     "html": 'Swelling or shape change<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>',
                 },

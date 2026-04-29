@@ -93,9 +93,9 @@
   {% endif %}
 {% endmacro %}
 
-{% macro symptoms_content(presented_medical_info, read_only=false) %}
-  {% set symptom_rows = presented_medical_info.read_only_symptom_rows if read_only else presented_medical_info.symptom_rows %}
-  <p {%- if not read_only and not symptom_rows %} class="nhsuk-u-margin-bottom-3"{% endif %}>Any problems or symptoms, including lumps, swelling, rashes or nipple changes</p>
+{% macro symptoms_content(presented_medical_info, read_only=false, significant_only=false) %}
+  {% set symptom_rows = presented_medical_info.significant_symptom_rows if significant_only else presented_medical_info.read_only_symptom_rows if read_only else presented_medical_info.symptom_rows %}
+  {%- if not significant_only %}<p {%- if not read_only and not symptom_rows %} class="nhsuk-u-margin-bottom-3"{% endif %}>Any problems or symptoms, including lumps, swelling, rashes or nipple changes</p>{% endif %}
   {% if symptom_rows %}
      {{ summaryList({
         "rows": symptom_rows

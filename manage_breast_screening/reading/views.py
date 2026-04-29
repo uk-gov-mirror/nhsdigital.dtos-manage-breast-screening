@@ -10,6 +10,9 @@ from manage_breast_screening.auth.models import Permission
 from manage_breast_screening.mammograms.presenters.medical_history.check_medical_information_presenter import (
     CheckMedicalInformationPresenter,
 )
+from manage_breast_screening.mammograms.presenters.medical_information_presenter import (
+    MedicalInformationPresenter,
+)
 from manage_breast_screening.participants.models import Appointment
 
 logger = getLogger(__name__)
@@ -39,7 +42,10 @@ class ShowImageReadView(PermissionRequiredMixin, TemplateView):
                 "heading": participant.full_name,
                 "caption": "Review images",
                 "images": images,
-                "presented_medical_information": CheckMedicalInformationPresenter(
+                "check_medical_information_presenter": CheckMedicalInformationPresenter(
+                    appointment
+                ),
+                "medical_information_presenter": MedicalInformationPresenter(
                     appointment
                 ),
                 "notes_for_reader": appointment.study.additional_details,

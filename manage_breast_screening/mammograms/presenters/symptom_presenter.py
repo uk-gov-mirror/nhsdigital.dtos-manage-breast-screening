@@ -19,6 +19,7 @@ from manage_breast_screening.participants.models.symptom import (
 class SymptomPresenter:
     def __init__(self, symptom):
         self._symptom = symptom
+        self.highlight_to_readers = symptom.highlight_to_readers
 
     @property
     def area_line(self):

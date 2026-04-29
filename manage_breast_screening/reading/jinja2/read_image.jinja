@@ -3,7 +3,9 @@
 {% from "nhsuk/components/inset-text/macro.jinja" import insetText %}
 {% from "nhsuk/components/summary-list/macro.jinja" import summaryList %}
 {% from "nhsuk/components/tag/macro.jinja" import tag %}
+{% from "nhsuk/components/warning-callout/macro.jinja" import warningCallout %}
 {% from "mammograms/check_information/medical_information_card.jinja" import medical_summary_card %}
+{% from "mammograms/medical_information/section_cards.jinja" import symptoms_content %}
 
 {# djlint:off H006 #}
 
@@ -55,6 +57,13 @@
         {% endif %}
       </div>
     </div>
+
+    {% if medical_information_presenter.significant_symptom_rows %}
+      {{ warningCallout({
+        "heading": "Significant symptoms reported",
+        "html": symptoms_content(medical_information_presenter, significant_only=True, read_only=True),
+      }) }}
+    {% endif %}
 
     <div class="nhsuk-grid-row">
       <div class="nhsuk-grid-column-one-third nhsuk-u-margin-bottom-4">
@@ -112,7 +121,7 @@
       }) }}
     {% endif %}
 
-    {{ medical_summary_card(presented_medical_information) }}
+    {{ medical_summary_card(check_medical_information_presenter) }}
   </div>
 </div>
 {% endblock %}
