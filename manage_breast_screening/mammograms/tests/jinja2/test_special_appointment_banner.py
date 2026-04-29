@@ -112,3 +112,51 @@ def test_special_appointment_banner_without_change_link(jinja_env, presenter):
         </div>
     """,
     )
+
+
+def test_special_appointment_banner_escapes_malicious_details(jinja_env):
+    malicious_details = "<script>alert(1)</script>"
+    presenter = SpecialAppointmentPresenter(
+        {
+            "PHYSICAL_RESTRICTION": {
+                "details": malicious_details,
+            }
+        },
+        "68d758d0-792d-430f-9c52-1e7a0c2aa1dd",
+    )
+
+    template = jinja_env.from_string(
+        dedent(
+            r"""
+                {% from 'mammograms/special_appointments/special_appointment_banner.jinja' import special_appointment_banner %}
+                {{ special_appointment_banner(presenter, show_change_link=False) }}
+                """
+        )
+    )
+
+    response = template.render({"presenter": presenter})
+
+    assertHTMLEqual(
+        response,
+        """
+        <div class="nhsuk-card nhsuk-card--warning">
+            <div class="nhsuk-card__content">
+                <h3 class="nhsuk-card__heading"><span role="text">
+                <span class="nhsuk-u-visually-hidden">Important: </span>
+                Special appointment
+                </span></h3>
+
+                <dl class="nhsuk-summary-list app-special-appointment-banner">
+                    <div class="nhsuk-summary-list__row">
+                        <dt class="nhsuk-summary-list__key">
+                        Physical restriction
+                        </dt>
+                        <dd class="nhsuk-summary-list__value">
+                        &lt;script&gt;alert(1)&lt;/script&gt;
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+        """,
+    )

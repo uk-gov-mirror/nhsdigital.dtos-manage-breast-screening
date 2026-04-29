@@ -6,11 +6,11 @@
       {% set rows = [] %}
       {% for reason in presented_special_appointment.reasons %}
         {# Build the value content (details) #}
-        {% set value_content = "" %}
+        {% set value = {} %}
         {% if reason.details %}
-          {% set value_content = reason.details %}
+          {% set value = {"html": reason.details | e} %}
         {% else %}
-          {% set value_content = "<span class=\"nhsuk-u-secondary-text-colour\">No details provided</span>" %}
+          {% set value = {"html": "<span class=\"nhsuk-u-secondary-text-colour\">No details provided</span>"} %}
         {% endif %}
 
         {# Add row for this support reason #}
@@ -18,9 +18,7 @@
           "key": {
             "text": reason.label
           },
-          "value": {
-            "html": value_content | safe
-          }
+          "value": value
         }) %}
       {% endfor %}
       {{ summaryList({
