@@ -4,6 +4,16 @@ from factory.django import DjangoModelFactory
 from .. import models
 
 
+class GatewayFactory(DjangoModelFactory):
+    class Meta:
+        model = models.Gateway
+
+    name = Sequence(lambda n: f"Gateway {n}")
+    description = Sequence(lambda n: f"Description for Gateway {n}")
+    oid = Sequence(lambda n: f"00000000-0000-0000-0000-{n:012d}")
+    resource_name = Sequence(lambda n: f"gateway-resource-{n}")
+
+
 class GatewayActionFactory(DjangoModelFactory):
     class Meta:
         model = models.GatewayAction
