@@ -111,6 +111,10 @@ class Appointment(BaseModel):
             counts[filter] = clinic.appointments.for_filter(filter).count()
         return counts
 
+    @classmethod
+    def with_study(cls):
+        return cls.objects.filter(study__isnull=False)
+
     @property
     def provider(self):
         return self.clinic_slot.provider
