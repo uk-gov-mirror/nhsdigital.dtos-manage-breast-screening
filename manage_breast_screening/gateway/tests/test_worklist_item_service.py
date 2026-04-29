@@ -22,7 +22,7 @@ from .factories import RelayFactory
 class TestWorklistItemService:
     def test_create_returns_gateway_action(self, _):
         appointment = AppointmentFactory()
-        RelayFactory(setting=appointment.clinic_slot.clinic.setting)
+        relay = RelayFactory(setting=appointment.clinic_slot.clinic.setting)
 
         action = WorklistItemService.create(appointment)
 
@@ -31,6 +31,7 @@ class TestWorklistItemService:
         assert action.status == GatewayActionStatus.PENDING
         assert action.type == GatewayActionType.WORKLIST_CREATE
         assert action.appointment == appointment
+        assert action.gateway == relay.gateway
 
     @time_machine.travel("2025-06-15 10:30:00", tick=False)
     def test_accession_number_format(self, _):

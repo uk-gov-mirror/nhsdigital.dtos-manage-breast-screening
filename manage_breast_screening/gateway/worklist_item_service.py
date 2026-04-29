@@ -139,6 +139,7 @@ class WorklistItemService:
                 accession_number=accession_number,
                 payload=payload,
                 status=GatewayActionStatus.PENDING,
+                gateway=relay.gateway,
             )
         except IntegrityError as e:
             raise GatewayActionAlreadyExistsError(

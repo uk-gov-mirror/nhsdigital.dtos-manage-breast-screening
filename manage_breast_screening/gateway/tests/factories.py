@@ -26,6 +26,7 @@ class GatewayActionFactory(DjangoModelFactory):
     status = models.GatewayActionStatus.PENDING
     accession_number = Sequence(lambda n: f"ACC20240601{n:04d}")
     sent_at = None
+    gateway = SubFactory(GatewayFactory)
 
 
 class RelayFactory(DjangoModelFactory):
@@ -39,3 +40,4 @@ class RelayFactory(DjangoModelFactory):
     setting = SubFactory(
         "manage_breast_screening.clinics.tests.factories.SettingFactory"
     )
+    gateway = SubFactory(GatewayFactory)
