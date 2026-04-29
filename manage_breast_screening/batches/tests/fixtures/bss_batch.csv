@@ -1,0 +1,71 @@
+
+Batch Parameters
+BSO Batch ID,BS1345815F
+Batch Title,Batch title 1
+NTD End Date,14-Sep-2014
+Start Age,50 Years 0 Months (null-null)
+End Age,70 Years 0 Months (null-null)
+Include Younger Women,No
+Call or Recall,Both
+GP Practices,All GP Practices
+Outcodes,All Outcodes
+Count (of which are ceased),3,(0),23-Apr-2026 14:59
+Selected (of which are ceased),3,(0),23-Apr-2026 14:59
+Rejected,Zero
+
+GP Practice Counts
+GP Practice Group,GP Practice,Practice Name,Count
+ABC,GP1,<a href="https://www.educative.io">Educative</a>,3
+ABC,NOORG1,NORTH SHORE MEDICAL PRACTICE,0
+ABC,EX0016,White Practice,0
+,EX0020,Purple Practice,0
+ABC,EX0012,Ruby Practice,0
+BS1ABD,A81613,JOURNEE MEDICAL PRACTICE,0
+ABC,A82030,LUNESDALE SURGERY,0
+,ZZZBS2,Dummy BS2 Practice,0
+ABC,EX0007,Navy Practice,0
+ABC,EX0010,Silver Practice,0
+ABC,GP3,South Greentown Practice,0
+,ZZZBS1,Dummy BS1 Practice,0
+ABC,EX0018,Peach Practice,0
+ABC,EX0011,Bronze Practice,0
+,A12345,Mega Practice,0
+BS1ABD,A81057,KINGSWAY MEDICAL CENTRE,0
+,EX0021,Grey Practice,0
+ABC,EX0015,Magnolia Practice,0
+ABC,EX0013,Diamond Practice,0
+,EX0014,Onyx Practice,0
+ABC,GP2,South Bluetown Practice,0
+BS1ABD,A82642,HAWKSHEAD MEDICAL PRACTICE,0
+ABC,EX0008,Obsidian Practice,0
+BS1ABD,A81031,https://www.bbc.co.uk/news,0
+ABC,NOORG2,NORTH SHORE MEDICAL PRACTICE,0
+ABC,EX0017,Black Practice,0
+ABC,EX0019,Pink Practice,0
+BS1ABD,B10009,REDSTREETMEDICALPRACTICEANDSTUPIDLYLONGNAMETOSEEIFITWRAPSCANBEONEHUNDREDCHARACTERSWITHNOWHITESPACE,0
+,A12345-A,Split Practice 1,0
+,EX0009,Gold Practice,0
+
+Outcode Counts
+Outcode,Count
+No outcode,2
+EX1,1
+AB5,0
+EX2,0
+EX4,0
+EX5,0
+EX8,0
+JJ1,0
+PL9,0
+YY1,0
+
+Episode End Code Counts
+End Code,Count
+Screening complete,1
+Open,3
+
+Selected Subjects
+NHS Number,Family Name,First Given Name,Born,GP Practice,End Code,Telephone No 1 (Mobile),Telephone No 2 (Home),Email Address Home,Preferred Language,Interpreter Required
+9300000019,CARPENTER,Janet,01-Dec-1954,GP1,,,,,,No
+9300000017,FRANKLIN,Felicity,01-Dec-1948,GP1,,,,,,No
+9300000013,PONKINGBURY,Babs,30-Jan-1952,GP1,,,,,,No
