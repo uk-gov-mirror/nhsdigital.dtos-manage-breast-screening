@@ -382,3 +382,5 @@ CONTENT_SECURITY_POLICY = {
         "style-src": (CSP_SELF,),
     }
 }
+
+BYPASS_API_TOKEN_AUTH = boolean_env("BYPASS_API_TOKEN_AUTH", default=False)
