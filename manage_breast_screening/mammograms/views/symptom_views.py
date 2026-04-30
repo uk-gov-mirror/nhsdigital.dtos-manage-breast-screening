@@ -22,6 +22,9 @@ from ..forms.symptom_forms import (
 )
 from .mixins import InProgressAppointmentMixin, MedicalInformationMixin
 
+HEADING_DESCRIPTION_KEY = "heading_description"
+HEADING_DESCRIPTION_SUFFIX = " a recognised symptom of breast cancer. Information recorded here will be highlighted during image reading."
+
 
 class BaseSymptomFormView(InProgressAppointmentMixin, FormView):
     """
@@ -58,17 +61,10 @@ class BaseSymptomFormView(InProgressAppointmentMixin, FormView):
                 "caption": participant.full_name,
                 "heading": f"Details of the {self.symptom_type_name.lower()}",
                 "page_title": f"Details of the {self.symptom_type_name.lower()}",
-                "heading_description": self._get_heading_description(),
             },
         )
 
         return context
-
-    def _get_heading_description(self):
-        suffix = " a recognised symptom of breast cancer. Information recorded here will be highlighted during image reading."
-        if self.symptom_type_name == "lump":
-            return "Lumps are" + suffix
-        return f"{self.symptom_type_name.capitalize()} is" + suffix
 
 
 class AddSymptomView(BaseSymptomFormView):
@@ -144,6 +140,11 @@ class AddSymptomLumpView(AddSymptomView):
     form_class = LumpForm
     template_name = "mammograms/medical_information/symptoms/forms/simple_symptom.jinja"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context[HEADING_DESCRIPTION_KEY] = "Lumps are" + HEADING_DESCRIPTION_SUFFIX
+        return context
+
 
 class AddSymptomSwellingOrShapeChangeView(AddSymptomView):
     """
@@ -153,6 +154,13 @@ class AddSymptomSwellingOrShapeChangeView(AddSymptomView):
     symptom_type_name = "swelling or shape change"
     form_class = SwellingOrShapeChangeForm
     template_name = "mammograms/medical_information/symptoms/forms/simple_symptom.jinja"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context[HEADING_DESCRIPTION_KEY] = (
+            "Swelling or shape change is" + HEADING_DESCRIPTION_SUFFIX
+        )
+        return context
 
 
 class AddSymptomSkinChangeView(AddSymptomView):
@@ -164,6 +172,11 @@ class AddSymptomSkinChangeView(AddSymptomView):
     form_class = SkinChangeForm
     template_name = "mammograms/medical_information/symptoms/forms/skin_change.jinja"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context[HEADING_DESCRIPTION_KEY] = "Skin change is" + HEADING_DESCRIPTION_SUFFIX
+        return context
+
 
 class AddSymptomNippleChangeView(AddSymptomView):
     """
@@ -173,6 +186,13 @@ class AddSymptomNippleChangeView(AddSymptomView):
     symptom_type_name = "Nipple change"
     form_class = NippleChangeForm
     template_name = "mammograms/medical_information/symptoms/forms/nipple_change.jinja"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context[HEADING_DESCRIPTION_KEY] = (
+            "Nipple change is" + HEADING_DESCRIPTION_SUFFIX
+        )
+        return context
 
 
 class AddOtherSymptomView(AddSymptomView):
@@ -185,7 +205,7 @@ class AddOtherSymptomView(AddSymptomView):
     template_name = "mammograms/medical_information/symptoms/forms/other.jinja"
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data()
+        context = super().get_context_data(**kwargs)
         context["heading"] = "Symptom details"
         return context
 
@@ -212,6 +232,11 @@ class UpdateSymptomLumpView(UpdateSymptomView):
     def extra_filters(self):
         return {"symptom_type_id": SymptomType.LUMP}
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context[HEADING_DESCRIPTION_KEY] = "Lumps are" + HEADING_DESCRIPTION_SUFFIX
+        return context
+
 
 class UpdateSymptomSwellingOrShapeChangeView(UpdateSymptomView):
     """
@@ -224,6 +249,13 @@ class UpdateSymptomSwellingOrShapeChangeView(UpdateSymptomView):
 
     def extra_filters(self):
         return {"symptom_type_id": SymptomType.SWELLING_OR_SHAPE_CHANGE}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context[HEADING_DESCRIPTION_KEY] = (
+            "Swelling or shape change is" + HEADING_DESCRIPTION_SUFFIX
+        )
+        return context
 
 
 class UpdateSymptomSkinChangeView(UpdateSymptomView):
@@ -238,6 +270,11 @@ class UpdateSymptomSkinChangeView(UpdateSymptomView):
     def extra_filters(self):
         return {"symptom_type_id": SymptomType.SKIN_CHANGE}
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context[HEADING_DESCRIPTION_KEY] = "Skin change is" + HEADING_DESCRIPTION_SUFFIX
+        return context
+
 
 class UpdateSymptomNippleChangeView(UpdateSymptomView):
     """
@@ -250,6 +287,13 @@ class UpdateSymptomNippleChangeView(UpdateSymptomView):
 
     def extra_filters(self):
         return {"symptom_type_id": SymptomType.NIPPLE_CHANGE}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context[HEADING_DESCRIPTION_KEY] = (
+            "Nipple change is" + HEADING_DESCRIPTION_SUFFIX
+        )
+        return context
 
 
 class UpdateOtherSymptomView(UpdateSymptomView):
@@ -265,7 +309,7 @@ class UpdateOtherSymptomView(UpdateSymptomView):
         return {"symptom_type_id": SymptomType.OTHER}
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data()
+        context = super().get_context_data(**kwargs)
         context["heading"] = "Symptom details"
         return context
 
