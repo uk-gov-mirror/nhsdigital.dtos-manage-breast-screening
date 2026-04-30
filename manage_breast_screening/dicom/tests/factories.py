@@ -16,6 +16,7 @@ from .. import models
 class StudyFactory(DjangoModelFactory):
     class Meta:
         model = models.Study
+        skip_postgeneration_save = True
 
     study_instance_uid = Sequence(lambda n: f"STUDY{n:04d}")
     source_message_id = uuid.uuid4()
@@ -24,6 +25,15 @@ class StudyFactory(DjangoModelFactory):
     description = "Test Study"
     appointment = SubFactory(
         AppointmentFactory, current_status=AppointmentStatusNames.SCREENED
+    )
+
+    case_1 = RelatedFactory(
+        "manage_breast_screening.dicom.tests.factories.CaseFactory",
+        factory_related_name="study",
+    )
+    case_2 = RelatedFactory(
+        "manage_breast_screening.dicom.tests.factories.CaseFactory",
+        factory_related_name="study",
     )
 
 
@@ -106,11 +116,22 @@ class ReadingFactory(DjangoModelFactory):
         )
 
 
+class CaseFactory(DjangoModelFactory):
+    class Meta:
+        model = models.Case
+
+    study = SubFactory(StudyFactory)
+
+
 class ReadingSessionItemFactory(DjangoModelFactory):
     class Meta:
         model = models.ReadingSessionItem
+        skip_postgeneration_save = True
 
-    study = SubFactory(StudyFactory)
+    case = SubFactory(CaseFactory)
+    session = SubFactory(
+        "manage_breast_screening.dicom.tests.factories.ReadingSessionFactory"
+    )
     reading_order = Sequence(lambda i: i)
 
 

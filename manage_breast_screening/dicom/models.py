@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.core.files.storage import storages
 from django.db import models
+from django.db.models import Exists, OuterRef
 
 from manage_breast_screening.core.models import BaseModel
 from manage_breast_screening.manual_images.models import (
@@ -162,10 +163,10 @@ class BreastOpinions(models.TextChoices):
 
 class Reading(BaseModel):
     """
-    One reader's opinion of a study. All of the opinions feed into the consensus read.
+    One reader's opinion of a study.
     """
 
-    study = models.ForeignKey(Study, on_delete=models.PROTECT, related_name="opinions")
+    study = models.ForeignKey(Study, on_delete=models.PROTECT, related_name="readings")
     reader = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="readings"
     )
@@ -217,9 +218,37 @@ class RecallForAssessmentDetails(BaseModel):
     left_breast_comment = models.CharField(null=False, blank=True, default="")
 
 
+class CaseQueryset(models.QuerySet):
+    def unassigned(self):
+        return self.filter(
+            ~Exists(ReadingSessionItem.objects.filter(case=OuterRef("id")))
+        )
+
+    def where_same_study_has_not_been_assigned_to_reader(self, reader):
+        return self.filter(
+            ~Exists(
+                ReadingSessionItem.objects.filter(
+                    case__study=OuterRef("study_id"),
+                    session__reader=reader,
+                )
+            )
+        )
+
+
+class Case(BaseModel):
+    """
+    A first or second read that needs doing for a study. These form the queue of cases
+    that can be picked up by an image reader.
+    """
+
+    objects = CaseQueryset.as_manager()
+
+    study = models.ForeignKey(Study, on_delete=models.CASCADE, related_name="cases")
+
+
 class ReadingSession(BaseModel):
     """
-    A grouping of studies that are read by a reader in a single session
+    A grouping of cases to be read by a reader in a single session
     """
 
     reader = models.ForeignKey(
@@ -232,22 +261,20 @@ class ReadingSession(BaseModel):
 
 class ReadingSessionItem(BaseModel):
     """
-    Assigns a study to a particular reading session, with an ordering.
+    An assignment of a pending reading to a reading session
     """
 
     session = models.ForeignKey(
         ReadingSession, on_delete=models.CASCADE, related_name="items"
     )
-    study = models.ForeignKey(
-        Study, on_delete=models.PROTECT, related_name="reading_session_items"
+    case = models.OneToOneField(
+        Case, on_delete=models.PROTECT, related_name="reading_session_item"
     )
     reading_order = models.IntegerField()
-    reading = models.OneToOneField(
-        Reading,
-        on_delete=models.PROTECT,
-        related_name="reading_session_item",
-        null=True,
-    )
 
     class Meta:
         unique_together = [("session", "reading_order")]
+
+    @property
+    def study(self):
+        return self.case.study

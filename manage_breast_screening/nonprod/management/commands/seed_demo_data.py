@@ -16,6 +16,7 @@ from manage_breast_screening.clinics.tests.factories import (
     SettingFactory,
     UserAssignmentFactory,
 )
+from manage_breast_screening.dicom.models import Case
 from manage_breast_screening.dicom.tests.factories import (
     ImageFactory as DicomImageFactory,
 )
@@ -403,7 +404,17 @@ class Command(BaseCommand):
             else:
                 reading = None
 
-            ReadingSessionItemFactory(session=session, reading=reading, **item)
+            study_id = item.pop("study_id")
+            case = Case.objects.unassigned().filter(study_id=study_id).first()
+
+            ReadingSessionItemFactory(
+                session=session,
+                case=case,
+                **item,
+            )
+
+            case.reading = reading
+            case.save()
 
     def create_reading(self, reader, reading_key):
         retake_requests = reading_key.pop("retake_requests", [])
