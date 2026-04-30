@@ -8,6 +8,9 @@ variable "environment" {
   type        = string
 }
 
+variable "env_vars_from_yaml" {
+  type = map(any)
+}
 variable "resource_group_name" {
   description = "Infra resource group name"
   type        = string
