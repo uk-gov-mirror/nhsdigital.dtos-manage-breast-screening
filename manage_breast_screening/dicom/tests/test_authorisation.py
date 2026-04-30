@@ -68,3 +68,22 @@ class TestAuthorisation:
         )
 
         assert Authorisation.authorise(source_message_id, oid) is False
+
+    def test_authorisation_no_gateway(self):
+        source_message_id = str(uuid.uuid4())
+        oid = str(uuid.uuid4())
+        GatewayActionFactory(
+            id=source_message_id,
+            gateway=None,
+            created_at=date.today(),
+            status=GatewayActionStatus.SENT,
+        )
+
+        assert Authorisation.authorise(source_message_id, oid) is False
+
+    def test_bypass_authorisation(self, monkeypatch):
+        source_message_id = str(uuid.uuid4())
+        oid = str(uuid.uuid4())
+        monkeypatch.setenv("BYPASS_API_AUTHORISATION", "true")
+
+        assert Authorisation.authorise(source_message_id, oid) is True
