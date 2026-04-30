@@ -1,7 +1,9 @@
 import uuid
 from datetime import date, timedelta
+from unittest.mock import patch
 
 import pytest
+from django.conf import settings
 
 from manage_breast_screening.gateway.models import GatewayActionStatus
 from manage_breast_screening.gateway.tests.factories import (
@@ -84,6 +86,6 @@ class TestAuthorisation:
     def test_bypass_authorisation(self, monkeypatch):
         source_message_id = str(uuid.uuid4())
         oid = str(uuid.uuid4())
-        monkeypatch.setenv("BYPASS_API_AUTHORISATION", "true")
 
-        assert Authorisation.authorise(source_message_id, oid) is True
+        with patch.object(settings, "BYPASS_API_AUTHORISATION", return_value=True):
+            assert Authorisation.authorise(source_message_id, oid) is True

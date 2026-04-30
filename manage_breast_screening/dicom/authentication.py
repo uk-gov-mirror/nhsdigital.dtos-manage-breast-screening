@@ -94,4 +94,4 @@ class Authentication(HttpBearer):
 
     @property
     def bypass_authentication(self) -> bool:
-        return getattr(settings, "BYPASS_API_TOKEN_AUTH", False)
+        return getattr(settings, "BYPASS_API_AUTHENTICATION", False)

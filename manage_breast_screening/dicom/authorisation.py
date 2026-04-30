@@ -1,6 +1,7 @@
 import logging
-import os
 from datetime import date
+
+from django.conf import settings
 
 from manage_breast_screening.gateway.models import GatewayAction, GatewayActionStatus
 
@@ -30,7 +31,4 @@ class Authorisation:
 
     @staticmethod
     def bypass_authorisation() -> bool:
-        if os.getenv("BYPASS_API_AUTHORISATION", "false").lower() == "true":
-            logger.warning("API authorisation bypass is enabled.")
-            return True
-        return False
+        return getattr(settings, "BYPASS_API_AUTHORISATION", False)

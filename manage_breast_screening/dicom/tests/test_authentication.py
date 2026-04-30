@@ -105,7 +105,7 @@ class TestAuthentication:
             assert request.auth == {"oid": "test_oid", "sub": "test_user"}
 
     def test_authentication_bypass_enabled(self, mock_logger, mock_jwks_signing_key):
-        with patch.object(settings, "BYPASS_API_TOKEN_AUTH", return_value=True):
+        with patch.object(settings, "BYPASS_API_AUTHENTICATION", return_value=True):
             authenticator = Authentication()
             assert authenticator(
                 Mock(headers={"Authorization": "Bearer anytoken"})

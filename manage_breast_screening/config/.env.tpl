@@ -39,6 +39,8 @@ API_AUTH_TOKEN=changeme
 # Django Ninja API
 API_ENABLED=true
 API_DOCS_ENABLED=true
+BYPASS_API_AUTHORISATION=false
+BYPASS_API_AUTHENTICATION=false
 
 # Automatic loading of PACS images from gateway
 GATEWAY_IMAGES_ENABLED=False
