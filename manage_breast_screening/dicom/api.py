@@ -11,6 +11,7 @@ from manage_breast_screening.core.api_schema import ErrorResponse, StatusRespons
 from manage_breast_screening.gateway.models import GatewayAction, GatewayActionStatus
 
 from .authentication import Authentication
+from .authorisation import Authorisation
 from .dicom_recorder import DicomRecorder
 
 router = Router(auth=Authentication())
@@ -36,7 +37,7 @@ class FailurePayload(ninja.Schema):
     response={
         201: SuccessResponse,
         400: ErrorResponse,
-        403: StatusResponse,
+        403: ErrorResponse,
         500: ErrorResponse,
     },
 )
@@ -56,6 +57,22 @@ def upload(request, source_message_id: str, file: File[UploadedFile]):
             "title": "No file uploaded",
             "status": 400,
             "detail": "A DICOM file must be uploaded in the 'file' form field.",
+        }
+
+    oid = request.auth.get("oid")
+
+    if oid is None:
+        return 403, {
+            "title": "Forbidden",
+            "status": 403,
+            "detail": "Authentication failed: OID claim is missing.",
+        }
+
+    if Authorisation.authorise(source_message_id, oid) is False:
+        return 403, {
+            "title": "Forbidden",
+            "status": 403,
+            "detail": "You do not have permission to upload for this message ID.",
         }
 
     try:

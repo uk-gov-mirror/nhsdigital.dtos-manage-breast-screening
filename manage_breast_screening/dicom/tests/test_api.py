@@ -10,13 +10,17 @@ from pydicom.uid import generate_uid
 
 from manage_breast_screening.core.api import api
 from manage_breast_screening.gateway.models import GatewayActionStatus
-from manage_breast_screening.gateway.tests.factories import GatewayActionFactory
+from manage_breast_screening.gateway.tests.factories import (
+    GatewayActionFactory,
+    GatewayFactory,
+)
 from manage_breast_screening.participants.models.appointment import (
     AppointmentStatusNames,
 )
 from manage_breast_screening.participants.tests.factories import AppointmentFactory
 
 from ..authentication import Authentication
+from ..authorisation import Authorisation
 from ..dicom_recorder import DicomRecorder
 from ..models import Study
 
@@ -50,13 +54,40 @@ def appointment_stub():
 
 
 @pytest.fixture
-def mock_authentication():
-    with patch.object(Authentication, "authenticate", return_value={"sub": "testuser"}):
+def source_message_id():
+    return "00000000-0000-0000-0000-000000000009"
+
+
+@pytest.fixture
+def gateway_oid():
+    return "00000000-0000-0000-0000-000000000001"
+
+
+@pytest.fixture
+def gateway_action(source_message_id, gateway_oid):
+    return GatewayActionFactory(
+        id=source_message_id,
+        status=GatewayActionStatus.SENT,
+        gateway=GatewayFactory(oid=gateway_oid),
+    )
+
+
+@pytest.fixture
+def mock_authentication(gateway_oid):
+    with patch.object(
+        Authentication, "_decode", return_value={"oid": gateway_oid, "sub": "testuser"}
+    ):
+        yield
+
+
+@pytest.fixture
+def mock_authorisation(gateway_oid):
+    with patch.object(Authorisation, "authorise", return_value=True):
         yield
 
 
 @pytest.mark.django_db
-def test_upload_success(dataset, dicom_file, mock_authentication, appointment_stub):
+def test_upload_success(dataset, dicom_file, mock_authentication, gateway_action):
     appointment = AppointmentFactory(current_status=AppointmentStatusNames.IN_PROGRESS)
 
     with patch(
@@ -64,11 +95,12 @@ def test_upload_success(dataset, dicom_file, mock_authentication, appointment_st
         return_value=appointment,
     ):
         response = client.put(
-            f"/dicom/{appointment.pk}",
+            f"/dicom/{gateway_action.id}",
             FILES={"file": dicom_file},
             headers={"Authorization": "Bearer testtoken"},
         )
 
+        print(response.json())
         assert response.status_code == 201
         json = response.json()
         study = Study.objects.last()
@@ -76,7 +108,7 @@ def test_upload_success(dataset, dicom_file, mock_authentication, appointment_st
         assert json["series_instance_uid"] == dataset.SeriesInstanceUID
         assert json["sop_instance_uid"] == dataset.SOPInstanceUID
         assert json["instance_id"] == str(study.images().first().id)
-        assert study.source_message_id == str(appointment.pk)
+        assert study.source_message_id == str(gateway_action.id)
 
 
 def test_upload_no_file(mock_authentication):
@@ -89,7 +121,9 @@ def test_upload_no_file(mock_authentication):
     assert response.status_code == 422
 
 
-def test_upload_invalid_file(mock_authentication, appointment_stub):
+def test_upload_invalid_file(
+    mock_authentication, mock_authorisation, appointment_stub, source_message_id
+):
     invalid_file = SimpleUploadedFile(
         "invalid.dcm", b"not a dicom file", content_type="application/dicom"
     )
@@ -99,7 +133,7 @@ def test_upload_invalid_file(mock_authentication, appointment_stub):
         return_value=appointment_stub,
     ):
         response = client.put(
-            "/dicom/abc123",
+            f"/dicom/{source_message_id}",
             FILES={"file": invalid_file},
             headers={"Authorization": "Bearer testtoken"},
         )
@@ -125,7 +159,9 @@ def test_upload_file_thats_too_large(mock_authentication):
     assert response.json()["detail"] == "The file cannot be larger than 100MB"
 
 
-def test_upload_missing_uids(dataset, mock_authentication, appointment_stub):
+def test_upload_missing_uids(
+    dataset, mock_authentication, mock_authorisation, appointment_stub
+):
     del dataset.StudyInstanceUID
     del dataset.SeriesInstanceUID
     del dataset.SOPInstanceUID
@@ -157,7 +193,7 @@ def test_upload_missing_uids(dataset, mock_authentication, appointment_stub):
 
 
 def test_upload_appointment_not_in_progress(
-    dicom_file, mock_authentication, appointment_stub
+    dicom_file, mock_authentication, mock_authorisation, appointment_stub
 ):
     appointment_stub.is_in_progress.return_value = False
 
@@ -185,7 +221,7 @@ def test_upload_when_api_disabled(dicom_file, mock_authentication, monkeypatch):
     )
 
     assert response.status_code == 403
-    assert response.json()["status"] == "API is not available"
+    assert response.json()["detail"] == "API is not available"
 
 
 def test_upload_no_auth(dicom_file):
@@ -213,22 +249,23 @@ def test_upload_invalid_auth(dicom_file):
     }
 
 
-def test_upload_bypass_token_validation(dicom_file):
-    with patch.object(Authentication, "bypass_authentication", return_value=True):
-        with patch.object(
-            DicomRecorder,
-            "get_or_create_records",
-            return_value=(
-                MagicMock(study_instance_uid=generate_uid()),
-                MagicMock(series_instance_uid=generate_uid()),
-                MagicMock(sop_instance_uid=generate_uid(), id=1),
-            ),
-        ):
-            response = client.put(
-                "/dicom/abc123",
-                FILES={"file": dicom_file},
-                headers={"Authorization": "Bearer anytoken"},
-            )
+@patch.object(Authentication, "bypass_authentication", return_value=True)
+@patch.object(Authorisation, "bypass_authorisation", return_value=True)
+def test_upload_bypass_auth(_y, _x, dicom_file):
+    with patch.object(
+        DicomRecorder,
+        "get_or_create_records",
+        return_value=(
+            MagicMock(study_instance_uid=generate_uid()),
+            MagicMock(series_instance_uid=generate_uid()),
+            MagicMock(sop_instance_uid=generate_uid(), id=1),
+        ),
+    ):
+        response = client.put(
+            "/dicom/abc123",
+            FILES={"file": dicom_file},
+            headers={"Authorization": "Bearer anytoken"},
+        )
 
     assert response.status_code == 201
 
