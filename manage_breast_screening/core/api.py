@@ -8,15 +8,19 @@ from ninja.security import HttpBearer
 
 from manage_breast_screening.dicom.api import router as dicom_router
 
-from .api_schema import StatusResponse
+from .api_schema import ErrorResponse, StatusResponse
 
 
 def check_availability():
     def decorator(func):
         @wraps(func)
         def wrapper(request, *args, **kwargs):
-            if not os.getenv("API_ENABLED", "true").lower() == "true":
-                return 403, {"status": "API is not available"}
+            if os.getenv("API_ENABLED", "true").lower() != "true":
+                return 403, {
+                    "title": "Forbidden",
+                    "status": 403,
+                    "detail": "API is not available",
+                }
             return func(request, *args, **kwargs)
 
         return wrapper
@@ -58,8 +62,6 @@ api.add_decorator(check_availability())
 dicom_router.add_decorator(check_availability())
 
 
-@api.get(
-    "/status", response={200: StatusResponse, 403: StatusResponse}, tags=["Status"]
-)
+@api.get("/status", response={200: StatusResponse, 403: ErrorResponse}, tags=["Status"])
 def status(request):
     return 200, {"status": "API is available"}

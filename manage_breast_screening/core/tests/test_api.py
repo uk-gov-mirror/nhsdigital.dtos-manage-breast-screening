@@ -37,7 +37,10 @@ def test_status_endpoint_api_disabled(monkeypatch):
     response = client.get("/status", headers={"Authorization": "Bearer testtoken"})
 
     assert response.status_code == 403
-    assert response.json() == {"status": "API is not available"}
+    json = response.json()
+    assert json["title"] == "Forbidden"
+    assert json["status"] == 403
+    assert json["detail"] == "API is not available"
 
 
 def test_status_wrong_auth(monkeypatch):
