@@ -94,9 +94,19 @@ class TestAuthentication:
         }
         mock_logger.exception.assert_not_called()
 
+    def test_request_auth_object_is_set(self, mock_logger, mock_jwks_signing_key):
+        with patch(
+            f"{Authentication.__module__}.jwt.decode",
+            return_value={"oid": "test_oid", "sub": "test_user"},
+        ):
+            authenticator = Authentication()
+            request = Mock(headers={"Authorization": "Bearer abc123"})
+            assert authenticator(request) == {"oid": "test_oid", "sub": "test_user"}
+            assert request.auth == {"oid": "test_oid", "sub": "test_user"}
+
     def test_authentication_bypass_enabled(self, mock_logger, mock_jwks_signing_key):
         with patch.object(settings, "BYPASS_API_TOKEN_AUTH", return_value=True):
             authenticator = Authentication()
             assert authenticator(
                 Mock(headers={"Authorization": "Bearer anytoken"})
-            ) == {"sub": "bypass_user"}
+            ) == {"oid": "bypass_object_id", "sub": "bypass_user"}

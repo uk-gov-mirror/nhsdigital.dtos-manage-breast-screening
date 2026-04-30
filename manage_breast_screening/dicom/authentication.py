@@ -13,15 +13,16 @@ JWT_SET_CACHE_TTL_SECONDS = 3600
 
 
 class Authentication(HttpBearer):
-    def authenticate(self, _, token) -> dict | None:
+    def authenticate(self, request, token) -> dict | None:
         """
         Authenticates the incoming request by validating the JWT token.
         """
         if self.bypass_authentication:
             logger.warning("Authentication bypass is enabled.")
-            return {"sub": "bypass_user"}
+            return {"oid": "bypass_object_id", "sub": "bypass_user"}
 
-        return self._decode(token)
+        request.auth = self._decode(token)
+        return request.auth
 
     def _decode(self, token: str) -> dict | None:
         """
