@@ -158,12 +158,9 @@ class TestSymptomPresenter:
                     },
                 ],
             },
-            "key": {
-                "html": 'Lump<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>',
-            },
-            "value": {
-                "html": "Left breast<br>Not sure<br>Symptom is intermittent<br>Stopped: resolved date<br>Not investigated<br>Additional information: abc",
-            },
+            "symptom_name": "Lump",
+            "highlight_to_readers": True,
+            "html": "Left breast<br>Not sure<br>Symptom is intermittent<br>Stopped: resolved date<br>Not investigated<br>Additional information: abc",
         }
 
     @pytest.mark.parametrize("highlight_to_readers", [True, False])
@@ -177,13 +174,6 @@ class TestSymptomPresenter:
 
         presenter = SymptomPresenter(symptom)
 
-        if highlight_to_readers:
-            expected_key = {
-                "html": 'Breast pain<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>',
-            }
-        else:
-            expected_key = {"text": "Breast pain"}
-
         assert presenter.summary_list_row == {
             "actions": {
                 "items": [
@@ -195,10 +185,9 @@ class TestSymptomPresenter:
                     }
                 ]
             },
-            "key": expected_key,
-            "value": {
-                "html": "Left breast<br>Less than 3 months ago<br>Not investigated"
-            },
+            "symptom_name": "Breast pain",
+            "highlight_to_readers": highlight_to_readers,
+            "html": "Left breast<br>Less than 3 months ago<br>Not investigated",
         }
 
     def test_delete_message_html(self):

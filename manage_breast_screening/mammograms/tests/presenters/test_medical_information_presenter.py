@@ -82,12 +82,9 @@ class TestRecordMedicalInformationPresenter:
                         },
                     ],
                 },
-                "key": {
-                    "html": 'Lump<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>',
-                },
-                "value": {
-                    "html": "Left breast<br>Not sure<br>Symptom is intermittent<br>Stopped: resolved date<br>Not investigated<br>Additional information: abc",
-                },
+                "symptom_name": "Lump",
+                "highlight_to_readers": True,
+                "html": "Left breast<br>Not sure<br>Symptom is intermittent<br>Stopped: resolved date<br>Not investigated<br>Additional information: abc",
             },
             {
                 "actions": {
@@ -100,12 +97,9 @@ class TestRecordMedicalInformationPresenter:
                         },
                     ],
                 },
-                "key": {
-                    "html": 'Other<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>'
-                },
-                "value": {
-                    "html": "Description: abc<br>Right breast<br>Less than 3 months ago<br>Not investigated"
-                },
+                "symptom_name": "Other",
+                "highlight_to_readers": True,
+                "html": "Description: abc<br>Right breast<br>Less than 3 months ago<br>Not investigated",
             },
             {
                 "actions": {
@@ -118,10 +112,9 @@ class TestRecordMedicalInformationPresenter:
                         }
                     ]
                 },
-                "key": {"text": "Other"},
-                "value": {
-                    "html": "Description: xyz<br>Left breast<br>Less than 3 months ago<br>Not investigated"
-                },
+                "symptom_name": "Other",
+                "highlight_to_readers": False,
+                "html": "Description: xyz<br>Left breast<br>Less than 3 months ago<br>Not investigated",
             },
             {
                 "actions": {
@@ -134,12 +127,9 @@ class TestRecordMedicalInformationPresenter:
                         },
                     ],
                 },
-                "key": {
-                    "html": 'Swelling or shape change<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>',
-                },
-                "value": {
-                    "html": "Both breasts<br>Less than 3 months ago<br>Not investigated",
-                },
+                "symptom_name": "Swelling or shape change",
+                "highlight_to_readers": True,
+                "html": "Both breasts<br>Less than 3 months ago<br>Not investigated",
             },
         ]
 

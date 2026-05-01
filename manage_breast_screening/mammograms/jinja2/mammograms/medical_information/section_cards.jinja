@@ -97,9 +97,7 @@
   {% set symptom_rows = presented_medical_info.read_only_symptom_rows if read_only else presented_medical_info.symptom_rows %}
   <p {%- if not read_only and not symptom_rows %} class="nhsuk-u-margin-bottom-3"{% endif %}>Any problems or symptoms, including lumps, swelling, rashes or nipple changes</p>
   {% if symptom_rows %}
-     {{ summaryList({
-        "rows": symptom_rows
-      }) }}
+     {{ symptoms_summary(symptom_rows) }}
   {% else %}
     {% set insetHtml %}
       <p>No symptoms have been recorded for this participant.</p>
@@ -243,4 +241,22 @@
       }
     ]
   }) }}
+{% endmacro %}
+
+{% macro symptoms_summary(symptom_rows, classes='') %}
+  {% set rows = [] %}
+  {% for row in symptom_rows %}
+    {% set key_html %}
+      {{ row.symptom_name }}
+      {% if row.highlight_to_readers %}
+        <br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>
+      {% endif %}
+    {% endset %}
+    {% set _ = rows.append({
+      "key": {"html": key_html},
+      "value": {"html": row.html},
+      "actions": row.actions if row.actions else {"items": []}
+    }) %}
+  {% endfor %}
+  {{ summaryList({"rows": rows, "classes": classes}) }}
 {% endmacro %}

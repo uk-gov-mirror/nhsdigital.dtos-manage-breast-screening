@@ -1,5 +1,5 @@
 from django.urls import reverse
-from django.utils.html import escape, format_html
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 from manage_breast_screening.core.template_helpers import (
@@ -139,18 +139,10 @@ class SymptomPresenter:
             ]
         )
 
-        if self._symptom.highlight_to_readers:
-            key = {
-                "html": format_html(
-                    '{}<br><strong class="nhsuk-tag app-nowrap nhsuk-tag--yellow">Highlight to image readers</strong>',
-                    self._symptom.symptom_type.name,
-                )
-            }
-        else:
-            key = {"text": self._symptom.symptom_type.name}
         result = {
-            "key": key,
-            "value": {"html": html},
+            "symptom_name": self._symptom.symptom_type.name,
+            "highlight_to_readers": self._symptom.highlight_to_readers,
+            "html": html,
         }
 
         if include_actions:

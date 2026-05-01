@@ -1,12 +1,9 @@
 {% extends "layout-confirmation.jinja" %}
-{% from 'nhsuk/components/summary-list/macro.jinja' import summaryList %}
+{% from "mammograms/medical_information/section_cards.jinja" import symptoms_summary %}
 {% from 'nhsuk/components/inset-text/macro.jinja' import insetText %}
 
 {% block details %}
-  {{ summaryList({
-    "rows": [summary_list_row],
-    "classes": "nhsuk-summary-list--no-border"
-  }) }}
+  {{ symptoms_summary([summary_list_row], classes="nhsuk-summary-list--no-border") }}
 
   {% set insetTextHtml %}
     <p>This action is final and cannot be undone.</p>
