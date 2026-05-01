@@ -1,10 +1,12 @@
+import time
 from unittest.mock import ANY, Mock
 
 import pytest
+from authlib.jose import JsonWebKey, jwt
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
-from django.test import override_settings
+from django.test import Client, override_settings
 from django.urls import reverse
 from pytest_django.asserts import assertInHTML
 
@@ -304,3 +306,105 @@ class TestJwksView:
 
         assert response.status_code == 500
         assert response.json() == {"keys": []}
+
+
+@pytest.mark.django_db
+class TestCis2BackChannelLogout:
+    @pytest.fixture
+    def cis2_jwk(self):
+        return JsonWebKey.generate_key(
+            "RSA", 2048, is_private=True, options={"kid": "test-key-1"}
+        )
+
+    @pytest.fixture
+    def mock_cis2_client(self, monkeypatch, cis2_jwk):
+        mock_client = Mock()
+        mock_client.load_server_metadata.return_value = {"issuer": "test-issuer"}
+        mock_client.fetch_jwk_set.return_value = {
+            "keys": [cis2_jwk.as_dict(is_private=False)]
+        }
+        monkeypatch.setattr(
+            "manage_breast_screening.auth.views.get_cis2_client",
+            lambda: mock_client,
+        )
+        return mock_client
+
+    def _make_logout_token(self, jwk, sub, *, overrides=None):
+        now = int(time.time())
+        payload = {
+            "iss": "test-issuer",
+            "aud": settings.CIS2_CLIENT_ID,
+            "iat": now,
+            "exp": now + 300,
+            "events": {"http://schemas.openid.net/event/backchannel-logout": {}},
+            "sub": sub,
+            "sid": "not-used",
+            "jti": "not-used",
+        }
+        if overrides:
+            payload.update(overrides)
+        token = jwt.encode(
+            {"alg": "RS256", "kid": jwk.kid},
+            payload,
+            jwk.as_dict(is_private=True),
+        )
+        return token.decode("utf-8")
+
+    def test_logs_out_user_for_valid_token(self, mock_cis2_client, cis2_jwk):
+        User = get_user_model()
+        user = User.objects.create_user(nhs_uid="user-123", email="user@example.com")
+        # Sign in on one client (representing the user's browser session)
+        user_client = Client()
+        user_client.force_login(user)
+        assert user.session_set.count() == 1
+
+        token = self._make_logout_token(cis2_jwk, sub=user.nhs_uid)
+
+        response = Client().post(
+            reverse("auth:cis2_back_channel_logout"),
+            data={"logout_token": token},
+        )
+
+        assert response.status_code == 200
+        assert user.session_set.count() == 0
+
+    def test_rejects_request_with_missing_logout_token(self):
+        response = Client().post(reverse("auth:cis2_back_channel_logout"), data={})
+
+        assert response.status_code == 400
+        assert b"Missing logout_token" in response.content
+
+    def test_rejects_expired_token(self, mock_cis2_client, cis2_jwk):
+        User = get_user_model()
+        user = User.objects.create_user(nhs_uid="user-123", email="user@example.com")
+        user_client = Client()
+        user_client.force_login(user)
+
+        now = int(time.time())
+        token = self._make_logout_token(
+            cis2_jwk,
+            sub=user.nhs_uid,
+            overrides={"iat": now - 300, "exp": now - 120},
+        )
+
+        response = Client().post(
+            reverse("auth:cis2_back_channel_logout"),
+            data={"logout_token": token},
+        )
+
+        assert response.status_code == 400
+        assert b"Invalid logout token" in response.content
+        assert user.session_set.count() == 1
+
+    def test_returns_ok_when_user_does_not_exist_locally(
+        self, mock_cis2_client, cis2_jwk
+    ):
+        token = self._make_logout_token(cis2_jwk, sub="unknown-user")
+
+        response = Client().post(
+            reverse("auth:cis2_back_channel_logout"),
+            data={"logout_token": token},
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {"status": "ok"}
