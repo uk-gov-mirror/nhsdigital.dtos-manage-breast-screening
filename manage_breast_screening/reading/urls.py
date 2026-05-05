@@ -7,7 +7,7 @@ app_name = "reading"
 urlpatterns = [
     path("", views.show_reading_dashboard_view, name="show_reading_dashboard"),
     path(
-        "sessions/<uuid:session_pk>/reads/<uuid:pk>/",
+        "sessions/<uuid:session_pk>/reads/<uuid:read_pk>/",
         views.ShowImageReadView.as_view(),
         name="image_read",
     ),

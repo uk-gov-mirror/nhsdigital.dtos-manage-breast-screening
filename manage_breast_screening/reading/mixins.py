@@ -10,8 +10,6 @@ class ReadingMixin:
     A view mixin that exposes the reading session item, scoped to the current provider.
     """
 
-    pk_url_kwarg = "pk"
-
     @cached_property
     def reading_session_item(self):
         provider = self.request.user.current_provider
@@ -23,7 +21,7 @@ class ReadingMixin:
                 .filter(
                     case__study__appointment__clinic_slot__clinic__setting__provider=provider
                 )
-                .get(pk=self.kwargs[self.pk_url_kwarg])
+                .get(pk=self.kwargs["read_pk"])
             )
         except ReadingSessionItem.DoesNotExist:
             raise Http404

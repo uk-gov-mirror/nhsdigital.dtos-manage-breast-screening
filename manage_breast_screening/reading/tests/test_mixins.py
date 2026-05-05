@@ -49,7 +49,7 @@ class TestReadingMixin:
 
             view = TestReadingMixin.DummyView()
             view.request = request
-            view.kwargs = {"pk": item.pk}
+            view.kwargs = {"read_pk": item.pk}
 
             assert view.reading_session_item == item
 
@@ -62,7 +62,7 @@ class TestReadingMixin:
 
             view = TestReadingMixin.DummyView()
             view.request = request
-            view.kwargs = {"pk": item.pk}
+            view.kwargs = {"read_pk": item.pk}
 
             with pytest.raises(Http404):
                 _ = view.reading_session_item

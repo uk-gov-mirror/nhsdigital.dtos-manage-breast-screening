@@ -79,7 +79,6 @@ class AddTechnicalRecallView(ReadingMixin, PermissionRequiredMixin, FormView):
     permission_required = Permission.READ_IMAGES
     form_class = TechnicalRecallForm
     success_url = reverse_lazy("reading:show_reading_dashboard")
-    pk_url_kwarg = "read_pk"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

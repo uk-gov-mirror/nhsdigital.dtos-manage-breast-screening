@@ -55,7 +55,7 @@ class TestReaderSubmitsTechnicalRecall(SystemTestCase):
             self.live_server_url
             + reverse(
                 "reading:image_read",
-                kwargs={"session_pk": self.session.pk, "pk": self.item.pk},
+                kwargs={"session_pk": self.session.pk, "read_pk": self.item.pk},
             )
         )
 
