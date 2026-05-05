@@ -65,6 +65,9 @@ class TechnicalRecallForm(FormWithConditionalFields):
             self.fields[f"{view}_reason"].error_messages["required"] = (
                 f"Select a reason for the {view.upper()} view"
             )
+            self.fields[
+                f"{view}_reason"
+            ].visually_hidden_label_suffix = f": {view.upper()}"
 
     def clean(self):
         cleaned_data = super().clean()
