@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     "manage_breast_screening.manual_images",
     "manage_breast_screening.gateway",
     "manage_breast_screening.reading",
+    "manage_breast_screening.batches",
     "rules.apps.AutodiscoverRulesConfig",
     "csp",
     "ninja",

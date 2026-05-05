@@ -1,0 +1,30 @@
+{% extends 'layout-form.jinja' %}
+{% from 'nhsuk/components/file-upload/macro.jinja' import fileUpload %}
+{% from 'nhsuk/components/button/macro.jinja' import button %}
+{% set enctype="multipart/form-data" %}
+{% set file_upload_params = {
+          "label": {
+            "text": "Upload a file"
+          },
+          "id": "csv_file",
+          "name": "csv_file",
+          "attributes": {
+            "data-testid": "csv-file-input"
+          }
+        }
+%}
+{% if form.csv_file.errors %}
+  {% set error_params = {
+    "errorMessage": {
+      "text": form.csv_file.errors | first
+    }
+  } %}
+  {% set file_upload_params = dict(file_upload_params, **error_params) %}
+{% endif %}
+<h2 class="nhsuk-fieldset__legend--s">Upload BSS data</h2>
+{% block form %}
+      {{ fileUpload(file_upload_params) }}
+      {{ button({
+      "text": "Save and continue"
+      }) }}
+{% endblock form %}
