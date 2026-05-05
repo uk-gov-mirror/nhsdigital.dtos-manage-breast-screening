@@ -22,14 +22,13 @@ from ..system_test_setup import SystemTestCase
 class TestReaderSubmitsTechnicalRecall(SystemTestCase):
     def test_reader_submits_technical_recall(self):
         self.given_i_am_logged_in_as_a_reader()
-        self.and_there_is_a_reading_session_item_for_me()
+        self.and_there_is_a_case_assigned_to_me()
         self.when_i_visit_the_reading_session_item_page()
         self.and_i_click_technical_recall()
         self.then_i_see_the_technical_recall_form()
 
         self.when_i_submit_the_form_without_filling_anything_in()
         self.then_i_see_validation_errors()
-
         self.when_i_select_views_to_retake()
         self.and_i_submit_the_form()
 
@@ -40,7 +39,7 @@ class TestReaderSubmitsTechnicalRecall(SystemTestCase):
     def given_i_am_logged_in_as_a_reader(self):
         self.login_as_role(Role.READER)
 
-    def and_there_is_a_reading_session_item_for_me(self):
+    def and_there_is_a_case_assigned_to_me(self):
         self.appointment = AppointmentFactory(
             clinic_slot__clinic__setting__provider=self.current_provider,
             current_status=AppointmentStatusNames.SCREENED,
