@@ -17,6 +17,7 @@ from django.http import (
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
@@ -192,6 +193,24 @@ def cis2_back_channel_logout(request):
     user.session_set.all().delete()
 
     return JsonResponse({"status": "ok"})
+
+
+@current_provider_exempt
+@require_http_methods(["GET"])
+@csrf_exempt
+@login_not_required
+@never_cache
+def login_status(request):
+    """
+    This view can be polled to check whether the session has been logged out.
+
+    This can happen for various reasons:
+        - the user logs out in another tab
+        - SESSION_INACTIVITY_TIMEOUT is exceeded without any further requests from the user
+        - SESSION_HARD_TIMEOUT is exceeded, or the cookie expires (SESSION_COOKIE_AGE)
+    """
+    # TODO: make sure this doesn't count as user activity
+    return JsonResponse({"logged_out": not request.user.is_authenticated})
 
 
 def _create_cis2_key_loader(client):
