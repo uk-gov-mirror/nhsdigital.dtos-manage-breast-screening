@@ -9,6 +9,8 @@ from django.core.validators import MinLengthValidator
 from django.db import models
 from django.db.models import OuterRef, Subquery
 
+from manage_breast_screening.dicom.models import Case
+
 from ..auth.models import Role
 from ..core.models import BaseModel
 from ..participants.models import Appointment, Participant
@@ -33,6 +35,12 @@ class Provider(BaseModel):
         return Participant.objects.filter(
             screeningepisode__appointment__clinic_slot__clinic__setting__provider=self
         ).distinct()
+
+    @property
+    def image_reading_cases(self):
+        return Case.objects.filter(
+            study__appointment__clinic_slot__clinic__setting__provider=self
+        )
 
     def get_config(self) -> "ProviderConfig":
         config, _ = ProviderConfig.objects.get_or_create(provider=self)
