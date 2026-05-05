@@ -209,8 +209,12 @@ def login_status(request):
         - SESSION_INACTIVITY_TIMEOUT is exceeded without any further requests from the user
         - SESSION_HARD_TIMEOUT is exceeded, or the cookie expires (SESSION_COOKIE_AGE)
     """
-    # TODO: make sure this doesn't count as user activity
-    return JsonResponse({"logged_out": not request.user.is_authenticated})
+    return JsonResponse(
+        {
+            "session_valid": request.user.is_authenticated,
+            "login_url": reverse(settings.LOGIN_URL),
+        }
+    )
 
 
 def _create_cis2_key_loader(client):

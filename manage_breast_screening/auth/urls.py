@@ -8,6 +8,7 @@ app_name = "auth"
 urlpatterns = [
     path("log-in/", views.login, name="login"),
     path("log-out/", views.logout, name="logout"),
+    path("status.json", views.login_status, name="login_status"),
     # CIS2 OpenID Connect
     path("cis2/log-in/", views.cis2_login, name="cis2_login"),
     path("cis2/callback/", views.cis2_callback, name="cis2_callback"),

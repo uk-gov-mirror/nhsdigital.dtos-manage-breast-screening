@@ -408,3 +408,24 @@ class TestCis2BackChannelLogout:
 
         assert response.status_code == 200
         assert response.json() == {"status": "ok"}
+
+
+@pytest.mark.django_db
+class TestLoginStatus:
+    def test_logged_in(self, clinical_user_client):
+        response = clinical_user_client.http.get(reverse("auth:login_status"))
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "session_valid": True,
+            "login_url": reverse("auth:persona_login"),
+        }
+
+    def test_logged_out(self, client):
+        response = client.get(reverse("auth:login_status"))
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "session_valid": False,
+            "login_url": reverse("auth:persona_login"),
+        }
