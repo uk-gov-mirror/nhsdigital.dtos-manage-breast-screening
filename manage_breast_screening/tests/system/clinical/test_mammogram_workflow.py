@@ -56,6 +56,57 @@ class TestMammogramWorkflow(SystemTestCase):
         self.when_i_click_complete_screening()
         self.then_i_should_be_back_on_the_clinic()
 
+    def test_using_the_back_link_to_return_to_hub_pages(
+        self,
+    ):
+        self.given_i_am_logged_in_as_a_clinical_user()
+        self.and_there_is_an_appointment()
+        self.and_i_am_on_the_appointment_show_page()
+
+        self.when_i_click_start_this_appointment()
+        self.then_i_should_be_on_the_confirm_identity_page()
+
+        self.when_i_click_appointment_cannot_proceed()
+        self.and_i_click_back()
+        self.then_i_should_be_on_the_confirm_identity_page()
+
+        self.when_i_click_confirm_identity()
+        self.then_i_should_be_on_the_record_medical_information_page()
+        self.when_i_click_add_a_mammogram()
+        self.and_i_click_back()
+        self.then_i_should_be_on_the_record_medical_information_page()
+
+        self.when_i_click_add_breast_cancer()
+        self.and_i_click_back()
+        self.then_i_should_be_on_the_record_medical_information_page()
+
+        self.when_i_click_add_lump()
+        self.and_i_click_back()
+        self.then_i_should_be_on_the_record_medical_information_page()
+
+        self.when_i_click_add_a_feature()
+        self.and_i_click_back()
+        self.then_i_should_be_on_the_record_medical_information_page()
+
+        self.when_i_click_enter_hrt_details()
+        self.and_i_click_back()
+        self.then_i_should_be_on_the_record_medical_information_page()
+
+        self.when_i_click_enter_pregnancy_and_breast_feeding_details()
+        self.and_i_click_back()
+        self.then_i_should_be_on_the_record_medical_information_page()
+
+        self.when_i_click_enter_other_medical_information_details()
+        self.and_i_click_back()
+        self.then_i_should_be_on_the_record_medical_information_page()
+
+        self.when_i_click_appointment_cannot_proceed()
+        self.and_i_click_back()
+        self.then_i_should_be_on_the_record_medical_information_page()
+
+        self.when_i_mark_that_imaging_can_go_ahead()
+        self.then_i_should_be_on_the_record_images_page()
+
     def test_accessibility(self):
         self.given_i_am_logged_in_as_a_clinical_user()
         self.and_there_is_an_appointment()
@@ -463,3 +514,36 @@ class TestMammogramWorkflow(SystemTestCase):
 
     def when_i_click_resume_appointment(self):
         self.page.get_by_role("button").filter(has_text="Resume appointment").click()
+
+    def when_i_click_add_a_mammogram(self):
+        self.page.get_by_text("Add another mammogram", exact=True).click()
+
+    def when_i_click_add_breast_cancer(self):
+        self.page.get_by_text("Breast cancer", exact=True).click()
+
+    def when_i_click_add_lump(self):
+        self.page.get_by_text("Lump", exact=True).click()
+
+    def when_i_click_add_a_feature(self):
+        self.page.get_by_text("Add a feature", exact=True).click()
+
+    def when_i_click_enter_hrt_details(self):
+        self.page.get_by_text(
+            "Enter hormone replacement therapy (HRT) details", exact=True
+        ).click()
+
+    def when_i_click_enter_pregnancy_and_breast_feeding_details(self):
+        self.page.get_by_text(
+            "Enter pregnancy and breastfeeding details", exact=True
+        ).click()
+
+    def when_i_click_enter_other_medical_information_details(self):
+        self.page.get_by_text(
+            "Enter other medical information details", exact=True
+        ).click()
+
+    def when_i_click_appointment_cannot_proceed(self):
+        self.page.get_by_text("Appointment cannot proceed", exact=True).click()
+
+    def and_i_click_back(self):
+        self.page.locator(".nhsuk-back-link").filter(has_text="Back").click()
