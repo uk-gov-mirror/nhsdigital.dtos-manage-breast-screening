@@ -65,4 +65,4 @@ class TestReadingMixin:
             view.kwargs = {"pk": item.pk}
 
             with pytest.raises(Http404):
-                view.reading_session_item  # noqa: B018
+                _ = view.reading_session_item
