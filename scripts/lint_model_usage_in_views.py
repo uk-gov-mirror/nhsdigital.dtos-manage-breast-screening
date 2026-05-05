@@ -12,6 +12,7 @@ REPO_ROOT = Path(__file__).parent.parent
 ALLOWLISTED_MODELS = (
     "User",
     "Provider",
+    "Batch",
 )
 
 TARGETS = {
