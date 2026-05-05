@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import transaction
 
-from ...dicom.models import ReadingSession, ReadingSessionItem
+from ...dicom.models import Opinions, Reading, ReadingSession, ReadingSessionItem
 
 
 class NoImagesToRead(Exception):
@@ -32,3 +32,10 @@ class ReadingSessionService:
         item = session.items.create(session=session, case=case, reading_order=1)
 
         return item
+
+    def record_technical_recall(self, item: ReadingSessionItem) -> Reading:
+        return Reading.objects.create(
+            study=item.study,
+            reader=self.reader,
+            opinion=Opinions.TECHNICAL_RECALL,
+        )

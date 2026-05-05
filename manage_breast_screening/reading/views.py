@@ -9,13 +9,13 @@ from django.views.generic.edit import FormView
 from rules.contrib.views import PermissionRequiredMixin
 
 from manage_breast_screening.auth.models import Permission
-from manage_breast_screening.dicom.models import Opinions, Reading
 from manage_breast_screening.mammograms.presenters.medical_history.check_medical_information_presenter import (
     CheckMedicalInformationPresenter,
 )
 
 from .forms import TechnicalRecallForm
 from .mixins import ReadingMixin
+from .services.reading_session_service import ReadingSessionService
 
 logger = getLogger(__name__)
 
@@ -92,9 +92,7 @@ class AddTechnicalRecallView(ReadingMixin, PermissionRequiredMixin, FormView):
 
     def form_valid(self, form):
         item = self.reading_session_item
-        Reading.objects.create(
-            study=item.study,
-            reader=self.request.user,
-            opinion=Opinions.TECHNICAL_RECALL,
-        )
+        ReadingSessionService(
+            self.request.user, self.request.user.current_provider
+        ).record_technical_recall(item)
         return super().form_valid(form)
