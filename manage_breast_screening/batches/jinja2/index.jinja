@@ -1,0 +1,32 @@
+{% extends 'layout-form.jinja' %}
+
+{% block page_content %}
+  <h2>Batches</h2>
+  <p class="nhsuk-u-margin-bottom-2">
+    <a href="{{url('batches:upload_csv')}}" class="nhsuk-link app-link">Upload a Batch</a>
+  </p>
+  {% if batches | length == 0 %}
+  <p>No batches found.</p>
+  {% else %}
+      <table class="nhsuk-table">
+      <thead class="nhsuk-table__head">
+        <tr>
+          <th class="nhsuk-table__header">Title</th>
+          <th class="nhsuk-table__header">BSO ID</th>
+        </tr>
+      </thead>
+      <tbody class="nhsuk-table__body">
+        {% for batch in batches %}
+          <tr>
+            <td class="nhsuk-table__cell">
+              {{batch.title}}
+             </td>
+            <td class="nhsuk-table__cell">
+              {{batch.bso_batch_id}}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      </table>
+  {% endif %}
+{% endblock %}

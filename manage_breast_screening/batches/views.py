@@ -5,8 +5,14 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from manage_breast_screening.batches.forms import BatchForm
+from manage_breast_screening.batches.models import Batch
 
 logger = getLogger(__name__)
+
+
+def index(request):
+    batches = Batch.objects.all()
+    return render(request, "index.jinja", {"batches": batches})
 
 
 def upload_csv(request):

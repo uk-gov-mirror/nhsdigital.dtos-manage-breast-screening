@@ -117,3 +117,24 @@ class TestBatchCsvUploadView:
                 )
             ],
         )
+
+
+@pytest.mark.django_db
+class TestBatchIndexView:
+    def test_renders_no_batches(self, administrative_user_client):
+        response = administrative_user_client.http.get(
+            reverse(
+                "batches:index",
+            )
+        )
+        assert response.status_code == 200
+        assert "No batches found." in response.text
+
+    def test_renders_with_batches(self, administrative_user_client):
+        _existing_batch = BatchFactory.create(title="Batch title 1")
+        response = administrative_user_client.http.get(
+            reverse(
+                "batches:index",
+            )
+        )
+        assert "Batch title 1" in response.text
