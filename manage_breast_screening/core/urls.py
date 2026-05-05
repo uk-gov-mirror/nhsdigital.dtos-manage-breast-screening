@@ -74,7 +74,8 @@ urlpatterns = [
         include(("manage_breast_screening.auth.urls", "auth"), namespace="auth"),
     ),
     path(
-        "batches/", include("manage_breast_screening.batches.urls", namespace="batches")
+        "batches/",
+        include("manage_breast_screening.batches.urls", namespace="batches"),
     ),
     path(
         "current-provider/select/",

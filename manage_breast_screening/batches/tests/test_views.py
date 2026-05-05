@@ -9,6 +9,10 @@ from manage_breast_screening.batches.tests.factories import BatchFactory
 
 @pytest.mark.django_db
 class TestBatchCsvUploadView:
+    @pytest.fixture(autouse=True)
+    def enable_flag(self, with_flag_enabled):
+        with_flag_enabled("batches")
+
     def test_renders_response(self, administrative_user_client):
         response = administrative_user_client.http.get(
             reverse(
@@ -16,6 +20,17 @@ class TestBatchCsvUploadView:
             )
         )
         assert response.status_code == 200
+
+    def test_get_with_flag_disabled_errors(
+        self, with_flag_disabled, administrative_user_client
+    ):
+        with_flag_disabled("batches")
+        response = administrative_user_client.http.get(
+            reverse(
+                "batches:upload_csv",
+            )
+        )
+        assert response.status_code == 404
 
     def test_missing_data_produces_validation_error(self, administrative_user_client):
         response = administrative_user_client.http.post(
@@ -121,6 +136,10 @@ class TestBatchCsvUploadView:
 
 @pytest.mark.django_db
 class TestBatchIndexView:
+    @pytest.fixture(autouse=True)
+    def enable_flag(self, with_flag_enabled):
+        with_flag_enabled("batches")
+
     def test_renders_no_batches(self, administrative_user_client):
         response = administrative_user_client.http.get(
             reverse(
@@ -138,3 +157,14 @@ class TestBatchIndexView:
             )
         )
         assert "Batch title 1" in response.text
+
+    def test_get_with_flag_disabled_errors(
+        self, with_flag_disabled, administrative_user_client
+    ):
+        with_flag_disabled("batches")
+        response = administrative_user_client.http.get(
+            reverse(
+                "batches:index",
+            )
+        )
+        assert response.status_code == 404

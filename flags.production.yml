@@ -1,2 +1,3 @@
 flags:
   gateway_images: false
+  batches: false

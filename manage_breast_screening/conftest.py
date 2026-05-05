@@ -46,6 +46,24 @@ def with_flag_enabled():
     setup_feature_flags(_FLAGS_YAML)
 
 
+@pytest.fixture
+def with_flag_disabled():
+    """Disable a named boolean OpenFeature flag for the duration of a test."""
+
+    enabled_flags = {}
+
+    def disable(flag_name: str):
+        enabled_flags[flag_name] = InMemoryFlag(
+            default_variant="off",
+            variants={"on": True, "off": False},
+        )
+        api.set_provider(InMemoryProvider(enabled_flags))
+
+    yield disable
+
+    setup_feature_flags(_FLAGS_YAML)
+
+
 def force_mbs_login(client, user):
     """Log in a user and set login_time to satisfy SessionTimeoutMiddleware."""
     client.force_login(user)

@@ -5,12 +5,16 @@ from ..system_test_setup import SystemTestCase
 
 
 class TestUploadBatch(SystemTestCase):
-    def test_uploading_a_new_batch(self):
+    def test_uploading_a_new_batch(self, with_flag_enabled):
+        self.given_the_batches_flag_is_enabled(with_flag_enabled)
         self.given_i_am_logged_in_as_an_administrative_user()
         self.and_i_am_on_the_batch_upload_page()
         self.when_i_submit_a_batch_csv()
         self.then_i_see_a_success_message()
         self.and_i_can_see_the_batch_in_the_batch_list()
+
+    def given_the_batches_flag_is_enabled(self, with_flag_enabled):
+        with_flag_enabled("batches")
 
     def and_i_am_on_the_batch_upload_page(self):
         self.page.goto(
