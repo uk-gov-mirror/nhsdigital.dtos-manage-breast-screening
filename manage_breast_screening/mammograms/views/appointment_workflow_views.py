@@ -348,8 +348,11 @@ class UpsertImagesView(WorkflowSidebarMixin, FormView):
                 )
             case _:
                 return redirect(
-                    "mammograms:confirm_appointment_cannot_go_ahead",
-                    pk=self.appointment_pk,
+                    reverse(
+                        "mammograms:confirm_appointment_cannot_go_ahead",
+                        kwargs={"pk": self.appointment_pk},
+                        query={"return_url": self.request.get_full_path()},
+                    )
                 )
 
     def mark_workflow_step_complete(self):

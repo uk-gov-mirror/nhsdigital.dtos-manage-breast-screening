@@ -459,11 +459,12 @@ class TestUpsertImagesView:
     def test_no_images_redirects_to_cannot_continue(
         self, clinical_user_client, reviewed_appointment
     ):
+        url = reverse(
+            "mammograms:upsert_images",
+            kwargs={"pk": reviewed_appointment.pk},
+        )
         response = clinical_user_client.http.post(
-            reverse(
-                "mammograms:upsert_images",
-                kwargs={"pk": reviewed_appointment.pk},
-            ),
+            url,
             {
                 "standard_images": RecordImagesTakenForm.StandardImagesChoices.NO_IMAGES_TAKEN
             },
@@ -473,6 +474,7 @@ class TestUpsertImagesView:
             reverse(
                 "mammograms:confirm_appointment_cannot_go_ahead",
                 kwargs={"pk": reviewed_appointment.pk},
+                query={"return_url": url},
             ),
         )
 

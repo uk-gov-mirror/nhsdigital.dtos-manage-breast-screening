@@ -107,6 +107,11 @@ class TestMammogramWorkflow(SystemTestCase):
         self.when_i_mark_that_imaging_can_go_ahead()
         self.then_i_should_be_on_the_record_images_page()
 
+        self.when_i_select_no_images_taken()
+        self.and_i_click_continue()
+        self.and_i_click_back()
+        self.then_i_should_be_on_the_record_images_page()
+
     def test_accessibility(self):
         self.given_i_am_logged_in_as_a_clinical_user()
         self.and_there_is_an_appointment()
@@ -544,6 +549,9 @@ class TestMammogramWorkflow(SystemTestCase):
 
     def when_i_click_appointment_cannot_proceed(self):
         self.page.get_by_text("Appointment cannot proceed", exact=True).click()
+
+    def when_i_select_no_images_taken(self):
+        self.page.get_by_label("No images taken").click()
 
     def and_i_click_back(self):
         self.page.locator(".nhsuk-back-link").filter(has_text="Back").click()
