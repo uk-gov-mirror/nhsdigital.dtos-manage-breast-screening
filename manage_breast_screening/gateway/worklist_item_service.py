@@ -19,12 +19,8 @@ def get_images_for_appointment(appointment: Appointment):
     """
     Get all DICOM images for an appointment.
     """
-    study = getattr(appointment, "dicom_study", None)
-    if not study:
-        return Image.objects.none()
-
     return (
-        Image.objects.filter(series__study=study)
+        Image.objects.filter(series__study__appointment=appointment)
         .select_related("series__study")
         .order_by("series__series_number", "instance_number")
     )
