@@ -1,16 +1,13 @@
 <div class="app-mammogram-view--{{ side }}">
-  {% if (images | length) == 0 %}
-    <div class="app-mammogram-thumbnail app-mammogram-thumbnail--{{ side }}">
+  <div class="app-mammogram-thumbnail app-mammogram-thumbnail--{{ side }}">
+    {% if (images | length) == 0 %}
       <div class="app-mammogram-thumbnail__image-wrapper app-mammogram-thumbnail__image-wrapper--large">
-          <span class="app-mammogram-thumbnail__label">{{ laterality }}</span>
-          <div class="app-mammogram-thumbnail__missing">
-            <span class="app-mammogram-thumbnail__missing-text">No image</span>
-          </div>
+        <span class="app-mammogram-thumbnail__label">{{ laterality }}</span>
+        <div class="app-mammogram-thumbnail__missing">
+          <span class="app-mammogram-thumbnail__missing-text">No image</span>
         </div>
       </div>
-    </div>
-  {% else %}
-    <div class="app-mammogram-thumbnail app-mammogram-thumbnail--{{ side }}">
+    {% else %}
       {% for image in images %}
         {% if image.image_file %}
           <div class="app-mammogram-thumbnail__image-wrapper app-mammogram-thumbnail__image-wrapper--large">
@@ -22,6 +19,6 @@
           </div>
         {% endif %}
       {% endfor %}
-    </div>
-  {% endif %}
+    {% endif %}
+  </div>
 </div>
