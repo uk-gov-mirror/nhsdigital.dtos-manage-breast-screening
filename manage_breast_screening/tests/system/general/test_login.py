@@ -156,12 +156,12 @@ class TestLogin(SystemTestCase):
         store.save()
 
     def and_i_am_logged_out_after_inactivity_timeout(self):
-        before_timeout = timezone.now() + timedelta(minutes=14)
+        before_timeout = timezone.now() + timedelta(minutes=29)
         with time_machine.travel(before_timeout, tick=False):
             self.page.reload()
             self.then_header_shows_log_out()  # Not logged out
             # Account for the 15-minute inactivity timeout plus the 1 minute update threshold
-            after_timeout = timezone.now() + timedelta(minutes=16)
+            after_timeout = timezone.now() + timedelta(minutes=31)
             with time_machine.travel(after_timeout, tick=False):
                 self.page.reload()
                 self.then_i_am_on_the_login_page()

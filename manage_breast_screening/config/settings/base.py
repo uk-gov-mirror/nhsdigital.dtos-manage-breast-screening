@@ -151,7 +151,7 @@ FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 SESSION_ENGINE = "qsessions.backends.db"
 SESSION_COOKIE_AGE = 43200  # 12 hours
-SESSION_INACTIVITY_TIMEOUT = 900  # 15 minutes - logout after inactivity
+SESSION_INACTIVITY_TIMEOUT = 1800  # 30 minutes - logout after inactivity
 SESSION_ACTIVITY_UPDATE_THRESHOLD = (
     60  # Update last_activity every 60s to reduce DB writes
 )

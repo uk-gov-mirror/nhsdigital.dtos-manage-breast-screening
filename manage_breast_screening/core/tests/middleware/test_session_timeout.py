@@ -22,6 +22,11 @@ class MockSession(dict):
         self.modified = False
 
 
+@pytest.fixture(autouse=True)
+def fix_settings(settings):
+    settings.SESSION_INACTIVITY_TIMEOUT = 900
+
+
 @pytest.fixture
 def middleware():
     return SessionTimeoutMiddleware(lambda _r: HttpResponse("OK"))
