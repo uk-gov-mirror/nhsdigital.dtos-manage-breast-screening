@@ -1,5 +1,6 @@
 studies:
   - id: c6ff5cea-a5b8-4823-b307-e5faf587b474
+    appointment_id: f7cfeb32-347b-4ccb-961e-1da71b8a3a08
     date_and_time: '2026-04-27 09:00'
     series:
       - view_position: CC
@@ -19,6 +20,7 @@ studies:
         images:
           - image_file: set-02/lmlo.png
   - id: 51a2f9a8-a8d4-4bcc-ad3f-7f20f4d71655
+    appointment_id: 94ea6642-6f3c-4211-b61b-735c4a313167
     date_and_time: '2026-04-27 10:00'
     series:
       - view_position: CC
@@ -38,6 +40,7 @@ studies:
         images:
           - image_file: set-03/lmlo.png
   - id: e468ecb0-33f2-4c27-a930-107c3fabd2d4
+    appointment_id: a6dc6ffd-4d28-46f0-8539-bd17360a59a1
     date_and_time: '2026-04-27 11:00'
     series:
       - view_position: CC
@@ -65,6 +68,7 @@ studies:
           - image_file: image-library/repeat-large-b-lmlo.png
         repeat_count: 0
   - id: bedbcf0b-b9d8-4d78-960f-ede6c05563d7
+    appointment_id: 0e3e960c-4c5b-4270-88c4-cd29f9a54ab0
     date_and_time: '2026-04-27 12:00'
     series:
       - view_position: CC
@@ -84,6 +88,7 @@ studies:
         images:
           - image_file: set-04/lmlo.png
   - id: 378f42d7-3361-43b8-bae6-0ce9113cba80
+    appointment_id: f5637d92-a8b4-4a46-bc46-b06b483ecb88
     date_and_time: '2026-04-27 13:00'
     series:
       - view_position: CC
@@ -103,6 +108,7 @@ studies:
         images:
           - image_file: set-05/lmlo.png
   - id: 15564f66-1d9d-4acd-b78f-1a32b4685124
+    appointment_id: ee71e1f1-322e-417a-a57f-4c52604ef9d3
     date_and_time: '2026-04-27 14:00'
     series:
       - view_position: CC
@@ -122,6 +128,7 @@ studies:
         images:
           - image_file: set-06/lmlo.png
   - id: 7dffd1de-88ae-4ac3-93d7-a8d4d0820e6b
+    appointment_id: dde78cb8-bd33-4d4f-b350-ead438ec55c2
     date_and_time: '2026-04-27 15:00'
     series:
       - view_position: CC
@@ -149,6 +156,7 @@ studies:
         repeat_reasons:
           - POSITIONING_ERROR
   - id: 3a447fe4-f4b3-4961-a83c-5bab17a2cda7
+    appointment_id: 6f80f6c2-b0dc-4b92-b3a5-8d95e4b253a6
     date_and_time: '2026-04-27 16:00'
     series:
       - view_position: CC
@@ -168,6 +176,7 @@ studies:
         images:
           - image_file: set-07/lmlo.png
   - id: 8fc7d736-f2d9-45ad-93cc-f289da5b720b
+    appointment_id: 9e57f30d-9073-41c0-bd16-2b2e6f57e38c
     date_and_time: '2026-04-27 17:00'
     series:
       - view_position: CC
@@ -187,6 +196,7 @@ studies:
         images:
           - image_file: set-08/lmlo.png
   - id: f61faccf-d9ea-4a9b-a284-021680565523
+    appointment_id: ad04c65e-77b4-40a1-af6d-a898bd53ad65
     date_and_time: '2026-04-27 18:00'
     series:
       - view_position: CC
@@ -206,6 +216,7 @@ studies:
         images:
           - image_file: set-09/lmlo.png
   - id: c089a4e6-8f66-4148-a14c-ec039e831c44
+    appointment_id: b256f3ce-9512-4d10-83c7-5406293b00b8
     date_and_time: '2026-04-27 19:00'
     series:
       - view_position: CC
@@ -225,6 +236,7 @@ studies:
         images:
           - image_file: set-10/lmlo.png
   - id: 3b25ff17-47b3-417c-9a8a-340c657f6578
+    appointment_id: 991fc3c5-79b8-4614-8823-7c8b7f3eb146
     date_and_time: '2026-04-27 20:00'
     series:
       - view_position: CC
@@ -244,6 +256,7 @@ studies:
         images:
           - image_file: set-11/lmlo.png
   - id: 779b425a-b733-4fa9-89d5-fddbb58f09ea
+    appointment_id: 08a7b38d-3369-41f1-9a16-d3c6b9816813
     date_and_time: '2026-04-27 21:00'
     series:
       - view_position: CC
@@ -263,6 +276,7 @@ studies:
         images:
           - image_file: set-12/lmlo.png
   - id: 0378ff58-baa5-4484-8afb-258ebfd1e5ef
+    appointment_id: 041e78a6-b88a-4671-9c55-ed462397c038
     date_and_time: '2026-04-27 22:00'
     series:
       - view_position: CC
@@ -282,6 +296,7 @@ studies:
         images:
           - image_file: set-13/lmlo.png
   - id: bb2ba1d3-1f72-428a-9c5a-39b50a5d9353
+    appointment_id: 1776b31f-369e-4808-b210-b41d5b2c9053
     date_and_time: '2026-04-27 23:00'
     series:
       - view_position: CC
@@ -301,6 +316,7 @@ studies:
         images:
           - image_file: set-14/lmlo.png
   - id: f0c600bf-dab2-44d5-aa5e-3b6481deeb48
+    appointment_id: b7d09b47-7b6f-4352-9aef-47cf9fea304e
     date_and_time: '2026-04-28 00:00'
     series:
       - view_position: CC
@@ -320,6 +336,7 @@ studies:
         images:
           - image_file: set-15/lmlo.png
   - id: bb2187a1-cd82-440f-94b1-46cef5938a23
+    appointment_id: 44346f34-3f61-485b-a6ac-96667388fe45
     date_and_time: '2026-04-28 01:00'
     series:
       - view_position: CC
@@ -339,6 +356,7 @@ studies:
         images:
           - image_file: set-16/lmlo.png
   - id: 9ce6e923-aa30-4118-ac64-725f0fc37698
+    appointment_id: 76944d52-111e-4beb-9d6f-ef144153856e
     date_and_time: '2026-04-28 02:00'
     series:
       - view_position: CC
@@ -358,6 +376,7 @@ studies:
         images:
           - image_file: set-17/lmlo.png
   - id: 9162a72b-3506-4b33-9acc-ef71bce07cb6
+    appointment_id: 6babc25d-baf5-4f62-96f8-28f63dce1ca6
     date_and_time: '2026-04-28 03:00'
     series:
       - view_position: CC
@@ -377,6 +396,7 @@ studies:
         images:
           - image_file: set-18/lmlo.png
   - id: 72233799-7179-435f-be6d-e493a8c6ce78
+    appointment_id: f5facb1d-f9ba-4278-b522-e86167a05b89
     date_and_time: '2026-04-28 04:00'
     series:
       - view_position: CC
@@ -396,6 +416,7 @@ studies:
         images:
           - image_file: set-19/lmlo.png
   - id: 813a60ef-940c-4d39-bc5b-0167b2dc214c
+    appointment_id: aaf48265-4000-47b5-b8a8-4911984cdcaf
     date_and_time: '2026-04-28 05:00'
     series:
       - view_position: CC
@@ -415,6 +436,7 @@ studies:
         images:
           - image_file: set-20/lmlo.png
   - id: 716f887d-8083-4cc8-9fea-d32213ca8fff
+    appointment_id: 1db71ea1-16c0-48cb-949d-affd98fc1d58
     date_and_time: '2026-04-28 06:00'
     series:
       - view_position: CC
@@ -434,6 +456,7 @@ studies:
         images:
           - image_file: set-21/lmlo.png
   - id: 4469102f-b8c6-4cba-9ed7-d77ee4f0ced8
+    appointment_id: f33dec37-7de9-40f7-8971-99abe28d9823
     date_and_time: '2026-04-28 07:00'
     series:
       - view_position: CC
@@ -453,6 +476,7 @@ studies:
         images:
           - image_file: set-22/lmlo.png
   - id: 1ecd140e-c427-4c6d-bf20-d138610b3c0b
+    appointment_id: 5d83831b-e173-4e7a-b7c1-74f7d6230059
     date_and_time: '2026-04-28 08:00'
     series:
       - view_position: CC
@@ -472,6 +496,7 @@ studies:
         images:
           - image_file: set-23/lmlo.png
   - id: 4ba01e6b-2c5f-4373-9740-4fa6ca22ca1f
+    appointment_id: 3fcd62ae-699f-49ef-b3a4-4eb7b4076a51
     date_and_time: '2026-04-28 09:00'
     series:
       - view_position: CC
@@ -491,6 +516,7 @@ studies:
         images:
           - image_file: set-24/lmlo.png
   - id: f082c62a-25b4-4aef-8fdf-415f31d296a4
+    appointment_id: 50b2834f-9976-4bff-b37f-4a7905e11ab3
     date_and_time: '2026-04-28 10:00'
     series:
       - view_position: CC
@@ -510,6 +536,7 @@ studies:
         images:
           - image_file: set-25/lmlo.png
   - id: d7d2c799-53fe-46c8-a81c-1cfb0e5fd4af
+    appointment_id: b4843161-76d8-4ded-8051-5da01c2949b5
     date_and_time: '2026-04-28 11:00'
     series:
       - view_position: CC
@@ -529,6 +556,7 @@ studies:
         images:
           - image_file: set-26/lmlo.png
   - id: ff3fdaa4-9b7d-4d24-b91a-36e45d4c7dfb
+    appointment_id: c2ee0a38-2a3d-4f5e-8d3d-6bb04cc7a22b
     date_and_time: '2026-04-28 12:00'
     series:
       - view_position: CC
@@ -588,3 +616,12 @@ reading_sessions:
       - study_id: 51a2f9a8-a8d4-4bcc-ad3f-7f20f4d71655
         reading:
           opinion: NORMAL
+
+  - id: b7e3f291-4a5d-4c6e-8f0a-1b2c3d4e5f60
+    reader:
+      first_name: Beverley
+      last_name: Wilson
+    session_size: 1
+    items:
+      - id: c9d0e1f2-5b6c-4d7e-9f0a-2b3c4d5e6f70
+        study_id: bedbcf0b-b9d8-4d78-960f-ede6c05563d7

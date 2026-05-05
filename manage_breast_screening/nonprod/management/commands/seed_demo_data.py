@@ -37,6 +37,7 @@ from manage_breast_screening.manual_images.tests.factories import (
     SeriesFactory,
     StudyFactory,
 )
+from manage_breast_screening.participants.models.appointment import Appointment
 from manage_breast_screening.participants.tests.factories import (
     AppointmentFactory,
     AppointmentStatusFactory,
@@ -376,12 +377,17 @@ class Command(BaseCommand):
 
     def create_dicom_study(self, study_key):
         date_and_time = study_key.get("date_and_time")
+        appointment_id = study_key.get("appointment_id")
+        appointment = (
+            Appointment.objects.get(id=appointment_id) if appointment_id else None
+        )
         study = DicomStudyFactory(
             id=study_key["id"],
             date_and_time=date_and_time,
             created_at=date_and_time,
             case_1__created_at=date_and_time,
             case_2__created_at=date_and_time,
+            **{"appointment": appointment} if appointment else {},
         )
         for series_key in study_key["series"]:
             images = series_key.pop("images")
