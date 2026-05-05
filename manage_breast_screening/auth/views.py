@@ -1,6 +1,7 @@
 import logging
 
 from authlib.integrations.base_client.errors import MismatchingStateError, OAuthError
+from authlib.jose import JsonWebKey
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model
@@ -169,7 +170,7 @@ def cis2_back_channel_logout(request):
     # Get the CIS2 client and prepare key loader for token verification
     client = get_cis2_client()
     metadata = client.load_server_metadata()
-    key_loader = client.create_load_key()
+    key_loader = _create_cis2_key_loader(client)
     try:
         claims = decode_logout_token(metadata["issuer"], key_loader, logout_token)
     except InvalidLogoutToken:
@@ -191,6 +192,28 @@ def cis2_back_channel_logout(request):
     user.session_set.all().delete()
 
     return JsonResponse({"status": "ok"})
+
+
+def _create_cis2_key_loader(client):
+    """Build a key loader for verifying CIS2-signed tokens.
+
+    Force-refreshes the cached JWKS on a kid miss so newly rotated CIS2 signing keys
+    are picked up without a process restart.
+    """
+
+    def load_key(header, _payload):
+        jwk_set = JsonWebKey.import_key_set(client.fetch_jwk_set())
+        try:
+            return jwk_set.find_by_kid(
+                header.get("kid"), use="sig", alg=header.get("alg")
+            )
+        except ValueError:
+            jwk_set = JsonWebKey.import_key_set(client.fetch_jwk_set(force=True))
+            return jwk_set.find_by_kid(
+                header.get("kid"), use="sig", alg=header.get("alg")
+            )
+
+    return load_key
 
 
 def _validate_id_assurance_level(level: int | str | None) -> str | None:
