@@ -24,6 +24,7 @@ from django.views.decorators.http import require_http_methods
 from manage_breast_screening.core.decorators import (
     basic_auth_exempt,
     current_provider_exempt,
+    session_timeout_exempt,
 )
 
 from .oauth import cis2_redirect_uri, get_cis2_client, public_jwk_from_rsa_private_key
@@ -195,10 +196,11 @@ def cis2_back_channel_logout(request):
     return JsonResponse({"status": "ok"})
 
 
-@current_provider_exempt
-@require_http_methods(["GET"])
-@csrf_exempt
 @login_not_required
+@current_provider_exempt
+@session_timeout_exempt
+@csrf_exempt
+@require_http_methods(["GET"])
 @never_cache
 def login_status(request):
     """
