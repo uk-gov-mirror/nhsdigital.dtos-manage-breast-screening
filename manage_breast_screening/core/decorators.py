@@ -4,6 +4,7 @@ from typing import Callable
 _basic_auth_exempt_views = set()
 _current_provider_exempt_views = set()
 _service_enabled_exempt_views = set()
+_session_timeout_exempt_views = set()
 
 
 def basic_auth_exempt(view_func: Callable) -> Callable:
@@ -46,6 +47,20 @@ def service_enabled_exempt(view_func: Callable) -> Callable:
 def is_service_enabled_exempt(view_func: Callable) -> bool:
     """Check if a view function is exempt from ServiceEnabledMiddleware."""
     return view_func_identifier(view_func) in _service_enabled_exempt_views
+
+
+def session_timeout_exempt(view_func: Callable) -> Callable:
+    """Mark a view function as exempt from BasicAuthMiddleware.
+
+    Uses a registry approach that is decorator-order independent.
+    """
+    _session_timeout_exempt_views.add(view_func_identifier(view_func))
+    return view_func
+
+
+def is_session_timeout_exempt(view_func: Callable) -> bool:
+    """Check if a view function is exempt from BasicAuthMiddleware."""
+    return view_func_identifier(view_func) in _basic_auth_exempt_views
 
 
 def view_func_identifier(view_func: Callable) -> str:

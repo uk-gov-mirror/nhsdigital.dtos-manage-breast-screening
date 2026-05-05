@@ -7,6 +7,8 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
 
+from manage_breast_screening.core.decorators import is_session_timeout_exempt
+
 logger = logging.getLogger(__name__)
 
 
@@ -39,11 +41,20 @@ class SessionTimeoutMiddleware:
         return redirect(reverse(settings.LOGIN_URL, query=query))
 
     def __call__(self, request):
-        if request.path.startswith(settings.API_PATH_PREFIX):
-            return self.get_response(request)
+        breakpoint()
+        return self.get_response(request)
 
+    def process_view(self, request, view_func, _view_args, _view_kwargs):
+        breakpoint()
         if not request.user.is_authenticated:
-            return self.get_response(request)
+            return None
+
+        if request.path.startswith(settings.API_PATH_PREFIX):
+            return None
+
+        # Skip if the view has been marked as exempt
+        if is_session_timeout_exempt(view_func):
+            return None
 
         now = timezone.now()
 
@@ -54,6 +65,7 @@ class SessionTimeoutMiddleware:
                 request.user.id,
             )
             return self._logout_and_redirect(request)
+
         login_time = datetime.fromisoformat(login_time_str)
         elapsed_since_login = (now - login_time).total_seconds()
         if elapsed_since_login > self.hard_timeout:
@@ -81,4 +93,5 @@ class SessionTimeoutMiddleware:
 
         request.session["last_activity"] = now.isoformat()
         request.session.modified = True
-        return self.get_response(request)
+
+        return None
