@@ -21,7 +21,9 @@ class TestTechnicalRecallForm:
         def test_view_checked_without_reason_is_invalid(self, view):
             form = make_form({view: "true"})
             assert not form.is_valid()
-            assert form.errors == {f"{view}_reason": ["Select a reason for recall"]}
+            assert form.errors == {
+                f"{view}_reason": [f"Select a reason for the {view.upper()} view"]
+            }
 
         @pytest.mark.parametrize("view", ["rcc", "rmlo", "lcc", "lmlo"])
         def test_view_checked_with_reason_is_valid(self, view):
@@ -32,8 +34,8 @@ class TestTechnicalRecallForm:
             form = make_form({"rcc": "true", "lmlo": "true"})
             assert not form.is_valid()
             assert form.errors == {
-                "rcc_reason": ["Select a reason for recall"],
-                "lmlo_reason": ["Select a reason for recall"],
+                "rcc_reason": ["Select a reason for the RCC view"],
+                "lmlo_reason": ["Select a reason for the LMLO view"],
             }
 
         def test_reason_for_unchecked_view_is_ignored(self):

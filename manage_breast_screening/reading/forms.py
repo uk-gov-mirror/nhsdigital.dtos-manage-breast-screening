@@ -28,7 +28,6 @@ class TechnicalRecallForm(FormWithConditionalFields):
         choices=RECALL_REASON_CHOICES,
         label="Reason for recall",
         required=False,
-        error_messages={"required": "Select a reason for recall"},
     )
     rcc_details = CharField(required=False, label="Additional details (optional)")
 
@@ -38,7 +37,6 @@ class TechnicalRecallForm(FormWithConditionalFields):
         choices=RECALL_REASON_CHOICES,
         label="Reason for recall",
         required=False,
-        error_messages={"required": "Select a reason for recall"},
     )
     rmlo_details = CharField(required=False, label="Additional details (optional)")
 
@@ -48,7 +46,6 @@ class TechnicalRecallForm(FormWithConditionalFields):
         choices=RECALL_REASON_CHOICES,
         label="Reason for recall",
         required=False,
-        error_messages={"required": "Select a reason for recall"},
     )
     lcc_details = CharField(required=False, label="Additional details (optional)")
 
@@ -58,7 +55,6 @@ class TechnicalRecallForm(FormWithConditionalFields):
         choices=RECALL_REASON_CHOICES,
         label="Reason for recall",
         required=False,
-        error_messages={"required": "Select a reason for recall"},
     )
     lmlo_details = CharField(required=False, label="Additional details (optional)")
 
@@ -66,6 +62,9 @@ class TechnicalRecallForm(FormWithConditionalFields):
         super().__init__(*args, **kwargs)
         for view in VIEWS:
             self.given_field_value(view, True).require_field(f"{view}_reason")
+            self.fields[f"{view}_reason"].error_messages["required"] = (
+                f"Select a reason for the {view.upper()} view"
+            )
 
     def clean(self):
         cleaned_data = super().clean()
