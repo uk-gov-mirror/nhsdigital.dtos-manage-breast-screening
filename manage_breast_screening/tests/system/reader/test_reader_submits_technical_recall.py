@@ -2,7 +2,9 @@ from django.urls import reverse
 from playwright.sync_api import expect
 
 from manage_breast_screening.auth.models import Role
+from manage_breast_screening.dicom.models import Opinions, Reading
 from manage_breast_screening.dicom.tests.factories import (
+    CaseFactory,
     ReadingSessionFactory,
     ReadingSessionItemFactory,
 )
@@ -33,6 +35,7 @@ class TestReaderSubmitsTechnicalRecall(SystemTestCase):
 
         # TODO: update this assertion once we have a service that can provide us the next session item to read
         self.then_i_am_on_the_reading_dashboard()
+        self.and_a_technical_recall_reading_is_recorded()
 
     def given_i_am_logged_in_as_a_reader(self):
         self.login_as_role(Role.READER)
@@ -44,7 +47,9 @@ class TestReaderSubmitsTechnicalRecall(SystemTestCase):
         )
         dicom_study = DicomStudyFactory(appointment=self.appointment)
         self.session = ReadingSessionFactory(reader=self.current_user)
-        self.item = ReadingSessionItemFactory(session=self.session, study=dicom_study)
+        self.item = ReadingSessionItemFactory(
+            session=self.session, case=CaseFactory(study=dicom_study)
+        )
 
     def when_i_visit_the_reading_session_item_page(self):
         self.page.goto(
@@ -67,18 +72,22 @@ class TestReaderSubmitsTechnicalRecall(SystemTestCase):
         self.page.get_by_role("button", name="Continue").click()
 
     def then_i_see_validation_errors(self):
-        # TODO: validation is not yet implemented — replace this placeholder with
-        # concrete error-summary / inline-error assertions once the form ships.
-        pass
+        expect(self.page.locator(".nhsuk-error-summary")).to_contain_text(
+            "Select at least one view to retake"
+        )
 
     def when_i_select_views_to_retake(self):
         self.page.get_by_label("RCC", exact=True).check()
-        self.page.locator("#rcc_reason").select_option("breast_positioning")
+        self.page.locator("#id_rcc_reason").select_option("breast_positioning")
         self.page.get_by_label("LMLO", exact=True).check()
-        self.page.locator("#lmlo_reason").select_option("image_blurred")
+        self.page.locator("#id_lmlo_reason").select_option("image_blurred")
 
     def and_i_submit_the_form(self):
         self.page.get_by_role("button", name="Continue").click()
 
     def then_i_am_on_the_reading_dashboard(self):
         self.expect_url("reading:show_reading_dashboard")
+
+    def and_a_technical_recall_reading_is_recorded(self):
+        reading = Reading.objects.get(study=self.item.study, reader=self.current_user)
+        assert reading.opinion == Opinions.TECHNICAL_RECALL

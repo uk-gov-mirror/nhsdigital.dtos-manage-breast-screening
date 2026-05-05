@@ -1,29 +1,11 @@
 {% extends "layout-app.jinja" %}
 {% from "nhsuk/components/button/macro.jinja" import button %}
-{% from "nhsuk/components/checkboxes/macro.jinja" import checkboxes %}
-
-{% macro recall_fields(prefix) %}
-<div class="nhsuk-form-group">
-  <label class="nhsuk-label" for="{{ prefix }}_reason">Reason for recall</label>
-  <select class="nhsuk-select" id="{{ prefix }}_reason" name="{{ prefix }}_reason">
-    <option value="" selected disabled>Select a reason</option>
-    <option value="breast_positioning">Breast positioning</option>
-    <option value="incorrect_exposure">Incorrect exposure</option>
-    <option value="image_obscured">Image obscured</option>
-    <option value="image_blurred">Image blurred</option>
-    <option value="image_missing">Image missing</option>
-    <option value="other_reason">Other reason</option>
-  </select>
-</div>
-<div class="nhsuk-form-group">
-  <label class="nhsuk-label nhsuk-label--s" for="{{ prefix }}_details">Additional details (optional)</label>
-  <input class="nhsuk-input" id="{{ prefix }}_details" name="{{ prefix }}_details" type="text">
-</div>
-{% endmacro %}
+{% from "django_form_helpers.jinja" import form_error_summary %}
 
 {% block page_content %}
 <div class="nhsuk-grid-row">
   <div class="nhsuk-grid-column-full">
+    {{ form_error_summary(form) }}
     <span class="nhsuk-caption-l">Erin Sauer</span>
     <h1 class="nhsuk-heading-l">Technical recall</h1>
 
@@ -36,61 +18,21 @@
         <div class="nhsuk-grid-column-one-half">
           <h3 class="nhsuk-heading-s">Right breast</h3>
 
-          {% set rcc_conditional = recall_fields("rcc") %}
-          {{ checkboxes({
-            "idPrefix": "rcc",
-            "name": "rcc",
-            "items": [
-              {
-                "value": "rcc",
-                "text": "RCC",
-                "conditional": {"html": rcc_conditional}
-              }
-            ]
-          }) }}
+          {% do form["rcc"].add_conditional_html("true", form["rcc_reason"].as_field_group() ~ form["rcc_details"].as_field_group()) %}
+          {{ form["rcc"].as_field_group() }}
 
-          {% set rmlo_conditional = recall_fields("rmlo") %}
-          {{ checkboxes({
-            "idPrefix": "rmlo",
-            "name": "rmlo",
-            "items": [
-              {
-                "value": "rmlo",
-                "text": "RMLO",
-                "conditional": {"html": rmlo_conditional}
-              }
-            ]
-          }) }}
+          {% do form["rmlo"].add_conditional_html("true", form["rmlo_reason"].as_field_group() ~ form["rmlo_details"].as_field_group()) %}
+          {{ form["rmlo"].as_field_group() }}
         </div>
 
         <div class="nhsuk-grid-column-one-half">
           <h3 class="nhsuk-heading-s">Left breast</h3>
 
-          {% set lcc_conditional = recall_fields("lcc") %}
-          {{ checkboxes({
-            "idPrefix": "lcc",
-            "name": "lcc",
-            "items": [
-              {
-                "value": "lcc",
-                "text": "LCC",
-                "conditional": {"html": lcc_conditional}
-              }
-            ]
-          }) }}
+          {% do form["lcc"].add_conditional_html("true", form["lcc_reason"].as_field_group() ~ form["lcc_details"].as_field_group()) %}
+          {{ form["lcc"].as_field_group() }}
 
-          {% set lmlo_conditional = recall_fields("lmlo") %}
-          {{ checkboxes({
-            "idPrefix": "lmlo",
-            "name": "lmlo",
-            "items": [
-              {
-                "value": "lmlo",
-                "text": "LMLO",
-                "conditional": {"html": lmlo_conditional}
-              }
-            ]
-          }) }}
+          {% do form["lmlo"].add_conditional_html("true", form["lmlo_reason"].as_field_group() ~ form["lmlo_details"].as_field_group()) %}
+          {{ form["lmlo"].as_field_group() }}
         </div>
       </div>
 

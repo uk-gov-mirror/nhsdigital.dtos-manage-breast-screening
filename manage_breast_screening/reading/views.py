@@ -2,15 +2,19 @@ from logging import getLogger
 
 from django.contrib.auth.decorators import permission_required
 from django.shortcuts import render
+from django.urls import reverse_lazy
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView
+from django.views.generic.edit import FormView
 from rules.contrib.views import PermissionRequiredMixin
 
 from manage_breast_screening.auth.models import Permission
+from manage_breast_screening.dicom.models import Opinions, Reading
 from manage_breast_screening.mammograms.presenters.medical_history.check_medical_information_presenter import (
     CheckMedicalInformationPresenter,
 )
 
+from .forms import TechnicalRecallForm
 from .mixins import ReadingMixin
 
 logger = getLogger(__name__)
@@ -70,8 +74,12 @@ class ShowImageReadView(ReadingMixin, PermissionRequiredMixin, TemplateView):
         return images
 
 
-class AddTechnicalRecallView(TemplateView):
+class AddTechnicalRecallView(ReadingMixin, PermissionRequiredMixin, FormView):
     template_name = "reading/technical_recall.jinja"
+    permission_required = Permission.READ_IMAGES
+    form_class = TechnicalRecallForm
+    success_url = reverse_lazy("reading:show_reading_dashboard")
+    pk_url_kwarg = "read_pk"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -82,3 +90,12 @@ class AddTechnicalRecallView(TemplateView):
             }
         )
         return context
+
+    def form_valid(self, form):
+        item = self.reading_session_item
+        Reading.objects.create(
+            study=item.study,
+            reader=self.request.user,
+            opinion=Opinions.TECHNICAL_RECALL,
+        )
+        return super().form_valid(form)

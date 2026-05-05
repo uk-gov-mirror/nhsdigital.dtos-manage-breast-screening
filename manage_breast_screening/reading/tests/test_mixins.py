@@ -5,6 +5,7 @@ from django.views import View
 
 from manage_breast_screening.clinics.tests.factories import ProviderFactory
 from manage_breast_screening.dicom.tests.factories import (
+    CaseFactory,
     ReadingSessionFactory,
     ReadingSessionItemFactory,
     StudyFactory,
@@ -38,7 +39,9 @@ class TestReadingMixin:
             )
             study = StudyFactory(appointment=appointment)
             session = ReadingSessionFactory()
-            return ReadingSessionItemFactory(session=session, study=study)
+            return ReadingSessionItemFactory(
+                session=session, case=CaseFactory(study=study)
+            )
 
         def test_returns_item_for_current_provider(self, reader, item):
             request = RequestFactory().get("/")
